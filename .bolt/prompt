@@ -1,0 +1,150 @@
+### ✅ Autenticação e Rotas Protegidas
+
+- Autenticação via **Supabase Auth**
+- Login por **e-mail/senha** ou **Gmail** (sem verificação de senha via Gmail)
+- Sem Stripe no onboarding
+- Rotas protegidas:
+  - `/favoritos`
+  - `/usuario`
+  - Solicitação de laudo
+  - Página de alertas
+- Acesso ao `/admin` restrito por role `admin`
+
+---
+
+### ✅ Banco de Dados (Supabase)
+
+Tabelas principais:
+
+- `lots_property` (imóveis)
+- `lots_vehicle` (veículos)
+
+Outras tabelas (ainda não criadas):
+
+- `favorites`
+- `user_profiles`
+- `alerts`
+- `laudos`
+
+---
+
+### 🏠 Filtros de Imóveis (`lots_property`)
+
+- Filtros combinados via lógica `AND`
+- Desktop: aplicação automática
+- Mobile: aplicação após clicar em "Aplicar"
+
+#### Filtros:
+
+1. `format`: seleção única
+2. `origin`: múltipla escolha
+3. `stage`: múltipla escolha
+4. `state`: seleção única
+5. `city`: dependente de `state`
+6. `useful_area_m2`: range numérico
+7. `initial_bid_value`: range numérico
+
+---
+
+### 🚗 Filtros de Veículos (`lots_vehicle`)
+
+Mesmo comportamento dos imóveis.
+
+#### Filtros:
+
+1. `format`: seleção única
+2. `origin`: múltipla escolha
+3. `stage`: múltipla escolha
+4. `state`: seleção única
+5. `city`: dependente de `state`
+6. `brand`: dependente do tipo
+7. `model`: dependente da marca
+8. `color`: seleção única (bolinhas)
+9. `year`: range numérico
+10. `initial_bid_value`: range numérico
+
+---
+
+### 🔽 Ordenação de Resultados
+
+1. Mais recentes — `updated DESC`
+2. Menor preço — `initial_bid_value ASC`
+3. Maior preço — `initial_bid_value DESC`
+4. Maior desconto — percentual calculado
+5. Mais próximos — `end_date ASC`
+
+---
+
+### 📄 Outros dados úteis do banco
+
+- `_id`, `image`, `href`, `end_date`, `website`, `updated`, `docs`
+- `website_image` → logo da leiloeira
+- `appraised_value` → usado no badge de desconto
+
+---
+
+### 🧾 Status da Listagem
+
+**Exemplo exibido:**
+
+> Encontramos 180 leilões em 64 sites · 3 novos hoje
+
+- Se `newAuctions === 0`, **omitimos** “· novos hoje”
+- “Hoje” = leilões com `updated` nas últimas 24h
+
+**Lógica de cálculo:**
+
+1. Filtrar apenas leilões com `end_date >= now`
+2. Calcular:
+   - `totalAuctions`: quantidade total após filtro
+   - `newAuctions`: baseados no campo `updated`
+   - `totalSites`: baseados em `website` ou `href` (via hostname)
+
+---
+
+### 🕓 Listagem pública
+
+Na **listagem pública**, os leilões que já passaram da data **são automaticamente ocultados** — ou seja, se o evento já aconteceu, o leilão some da busca.
+
+---
+
+### 🔗 Campos obrigatórios nos cards
+
+#### Imóveis:
+- `image`, `property_type`, `useful_area_m2`, `property_address`, `city`, `state`
+- `initial_bid_value`, `origin`, `stage`, `end_date`, `href`
+
+#### Veículos:
+- `image`, `vehicle_type`, `brand`, `model`, `color`, `year`, `city`, `state`
+- `initial_bid_value`, `origin`, `stage`, `end_date`, `href`
+
+---
+
+### 🏷️ Badge de Desconto
+
+- Cálculo: `((appraised_value - initial_bid_value) / appraised_value) * 100`
+- Só aparece se for **maior que 0%**
+- Nunca exibir "0%" ou badge vazio
+- Requer campo `appraised_value`
+
+---
+
+### Badge “Novo” 
+
+Regras de exibição:
+
+- O badge só aparece se o leilão tiver sido coletado (`data_scraped`) **nas últimas 24 horas** em relação à hora atual.
+- O badge deve aparecer **independente de estar na página buscador ou favoritos**, desde que o card esteja visível.
+- Aparece tanto em cards horizontais quanto verticais, imóveis ou veículos.
+
+---
+
+### ✂️ Truncamento de texto nos cards
+
+#### Imóveis:
+- Linha 1: `property_type` pode truncar se invadir espaço do botão favorito
+- Linha 2: só `property_address` pode truncar (cidade e estado **nunca**)
+
+#### Veículos:
+- Linha 1: `model` pode truncar
+- Linha 2: só `city` pode truncar (estado **nunca**)
