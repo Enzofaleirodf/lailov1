@@ -78,7 +78,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
             type="text"
             value={formatDisplayValue(safeValue[0])}
             onChange={(e) => handleInputChange(0, e.target.value)}
-            className={cn("border-gray-200 rounded-xl h-12", prefix && "pl-8", suffix && "pr-8")}
+            className={cn("border-gray-200 rounded-xl h-12 shadow-sm", prefix && "pl-8", suffix && "pr-8")}
             placeholder="Mínimo"
           />
           {suffix && (
@@ -100,7 +100,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
             type="text"
             value={formatDisplayValue(safeValue[1])}
             onChange={(e) => handleInputChange(1, e.target.value)}
-            className={cn("border-gray-200 rounded-xl h-12", prefix && "pl-8", suffix && "pr-8")}
+            className={cn("border-gray-200 rounded-xl h-12 shadow-sm", prefix && "pl-8", suffix && "pr-8")}
             placeholder="Máximo"
           />
           {suffix && (

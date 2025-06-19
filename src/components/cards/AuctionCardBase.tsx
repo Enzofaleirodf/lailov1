@@ -218,14 +218,32 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
               } text-gray-500 leading-tight ${
                 viewMode === 'vertical' ? 'mb-2' : ''
               } ${viewMode === 'horizontal' ? 'flex items-center gap-1' : 'line-clamp-2'}`}>
-                {/* ✅ CORREÇÃO: Endereço + cidade/estado colados à esquerda */}
+                {/* ✅ CORREÇÃO: Renderizar baseado no tipo (imóveis vs veículos) */}
                 {subtitleParts && viewMode === 'horizontal' ? (
                   <>
-                    <span className="truncate min-w-0">{subtitleParts.address}</span>
-                    {subtitleParts.cityState && (
+                    {/* Para imóveis: endereço + cidade/estado */}
+                    {subtitleParts.address ? (
                       <>
-                        <span className="flex-shrink-0"> – </span>
-                        <span className="flex-shrink-0">{subtitleParts.cityState}</span>
+                        <span className="truncate min-w-0">{subtitleParts.address}</span>
+                        {subtitleParts.cityState && (
+                          <>
+                            <span className="flex-shrink-0"> – </span>
+                            <span className="flex-shrink-0">{subtitleParts.cityState}</span>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      /* Para veículos: detalhes (cor • ano) + cidade/estado */
+                      <>
+                        {subtitleParts.details && (
+                          <span className="flex-shrink-0">{subtitleParts.details}</span>
+                        )}
+                        {subtitleParts.cityState && (
+                          <>
+                            <span className="flex-shrink-0"> – </span>
+                            <span className="flex-shrink-0">{subtitleParts.cityState}</span>
+                          </>
+                        )}
                       </>
                     )}
                   </>

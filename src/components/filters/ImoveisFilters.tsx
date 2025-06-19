@@ -96,11 +96,10 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
       onOrigemChange={handleOrigemChange}
       onEtapaChange={handleEtapaChange}
     >
-      {/* Filtros específicos de imóveis */}
-
-      {/* Área */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+      {/* 🎯 2. ÁREA - PRIMÁRIO */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
           Área
         </label>
         {rangesLoading ? (
@@ -125,13 +124,11 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
         )}
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
-
-      {/* Valor de Avaliação */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Valor de Avaliação
+      {/* 🎯 3. VALOR DO LANCE - PRIMÁRIO */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+          Valor do Lance
         </label>
         {rangesLoading ? (
           <div className="space-y-4">

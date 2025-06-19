@@ -76,13 +76,14 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Localização */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+    <div className="space-y-8">
+      {/* 🎯 1. LOCALIZAÇÃO - PRIMÁRIO */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
           Localização
         </label>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-3">
           <ComboBoxSearch
             options={estados}
             value={estado}
@@ -102,60 +103,63 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
-
-      {/* Filtros específicos da categoria (área, marca, etc.) */}
+      {/* Filtros específicos da categoria (área, preço, marca, etc.) - PRIMÁRIOS */}
       {children}
 
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
+      {/* 🎛️ FILTROS AVANÇADOS */}
+      <div className="space-y-6 pt-4 border-t-2 border-gray-100">
+        <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+          Filtros Avançados
+        </div>
 
-      {/* Formato */}
-      <FormatToggle
-        value={formato}
-        onValueChange={onFormatoChange}
-        options={formatos} // ✅ NOVO: Passar opções condicionais
-        disabled={loading}
-      />
+        {/* Formato - AZUL PADRONIZADO */}
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+            Formato
+          </label>
+          <FormatToggle
+            value={formato}
+            onValueChange={onFormatoChange}
+            options={formatos}
+            disabled={loading}
+          />
+        </div>
 
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
+        {/* Origem - AZUL PADRONIZADO */}
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+            Origem
+          </label>
+          <MultiToggleGrid
+            options={origens}
+            value={origem}
+            onValueChange={onOrigemChange}
+            disabled={loading}
+          />
+        </div>
 
-      {/* Origem */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Origem
-        </label>
-        <MultiToggleGrid
-          options={origens} // ✅ NOVO: Usar opções condicionais
-          value={origem}
-          onValueChange={onOrigemChange}
-          disabled={loading}
-        />
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
-
-      {/* Etapa */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Etapa
-        </label>
-        <MultiToggleGrid
-          options={etapas} // ✅ NOVO: Usar opções condicionais
-          value={etapa}
-          onValueChange={onEtapaChange}
-          disabled={isVendaDireta || loading}
-        />
-        {/* Espaço reservado para mensagem condicional para evitar layout shift */}
-        <div className="min-h-[16px] mt-2">
-          {isVendaDireta && (
-            <p className="text-xs text-gray-500">
-              Etapas não se aplicam à venda direta
-            </p>
-          )}
+        {/* Etapa - AZUL PADRONIZADO */}
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+            Etapa
+          </label>
+          <MultiToggleGrid
+            options={etapas}
+            value={etapa}
+            onValueChange={onEtapaChange}
+            disabled={isVendaDireta || loading}
+          />
+          {/* Espaço reservado para mensagem condicional para evitar layout shift */}
+          <div className="min-h-[16px] mt-2">
+            {isVendaDireta && (
+              <p className="text-xs text-gray-500">
+                Etapas não se aplicam à venda direta
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

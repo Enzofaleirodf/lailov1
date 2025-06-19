@@ -123,86 +123,88 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
       onOrigemChange={handleOrigemChange}
       onEtapaChange={handleEtapaChange}
     >
-      {/* Filtros específicos de veículos */}
+      {/* 🎯 2. CARACTERÍSTICAS DO VEÍCULO - PRIMÁRIO */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+          Características do Veículo
+        </label>
+        <div className="space-y-4">
+          {/* Marca e Modelo */}
+          {shouldShowBrandModelFilters && (
+            <div>
+              <label className="block text-sm font-medium text-blue-800 mb-2">
+                Marca e Modelo
+              </label>
+              <div className="grid grid-cols-1 gap-2">
+                <ComboBoxSearch
+                  options={brands}
+                  value={filters.marca}
+                  onValueChange={handleMarcaChange}
+                  placeholder={loading ? "Carregando marcas..." : LABEL_CONFIG.PLACEHOLDERS.SELECT_BRAND}
+                  searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_BRAND}
+                  disabled={loading}
+                />
+                <ComboBoxSearch
+                  options={models}
+                  value={filters.modelo}
+                  onValueChange={handleModeloChange}
+                  placeholder={LABEL_CONFIG.PLACEHOLDERS.SELECT_MODEL}
+                  searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_MODEL}
+                  disabled={!filters.marca || filters.marca === "all" || loading}
+                />
+              </div>
+            </div>
+          )}
 
-      {/* Marca e Modelo - Só exibir se não for 'todos' ou 'nao-informado' */}
-      {shouldShowBrandModelFilters && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Marca e Modelo
-          </label>
-          <div className="grid grid-cols-1 gap-2">
+          {/* Cor */}
+          <div>
+            <label className="block text-sm font-medium text-blue-800 mb-2">
+              Cor
+            </label>
             <ComboBoxSearch
-              options={brands}
-              value={filters.marca}
-              onValueChange={handleMarcaChange}
-              placeholder={loading ? "Carregando marcas..." : LABEL_CONFIG.PLACEHOLDERS.SELECT_BRAND}
-              searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_BRAND}
+              options={colors}
+              value={filters.cor}
+              onValueChange={handleCorChange}
+              placeholder={loading ? "Carregando cores..." : LABEL_CONFIG.PLACEHOLDERS.SELECT_COLOR}
+              searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_COLOR}
               disabled={loading}
             />
-            <ComboBoxSearch
-              options={models}
-              value={filters.modelo}
-              onValueChange={handleModeloChange}
-              placeholder={LABEL_CONFIG.PLACEHOLDERS.SELECT_MODEL}
-              searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_MODEL}
-              disabled={!filters.marca || filters.marca === "all" || loading}
-            />
+          </div>
+
+          {/* Ano */}
+          <div>
+            <label className="block text-sm font-medium text-blue-800 mb-2">
+              Ano
+            </label>
+            {rangesLoading ? (
+              <div className="space-y-4">
+                <div className="h-2 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
+                  <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
+                </div>
+              </div>
+            ) : (
+              <RangeSlider
+                min={effectiveYearRange[0]}
+                max={effectiveYearRange[1]}
+                value={effectiveYearValue}
+                onValueChange={handleAnoChange}
+              />
+            )}
+            {rangesError && (
+              <p className="text-xs text-amber-600 mt-1">{rangesError}</p>
+            )}
           </div>
         </div>
-      )}
-
-      {/* Cor */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Cor
-        </label>
-        <ComboBoxSearch
-          options={colors}
-          value={filters.cor}
-          onValueChange={handleCorChange}
-          placeholder={loading ? "Carregando cores..." : LABEL_CONFIG.PLACEHOLDERS.SELECT_COLOR}
-          searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_COLOR}
-          disabled={loading}
-        />
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
-
-      {/* Ano */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Ano
-        </label>
-        {rangesLoading ? (
-          <div className="space-y-4">
-            <div className="h-2 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-            </div>
-          </div>
-        ) : (
-          <RangeSlider
-            min={effectiveYearRange[0]}
-            max={effectiveYearRange[1]}
-            value={effectiveYearValue}
-            onValueChange={handleAnoChange}
-          />
-        )}
-        {rangesError && (
-          <p className="text-xs text-amber-600 mt-1">{rangesError}</p>
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-gray-200 my-6"></div>
-
-      {/* Valor de Avaliação */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Valor de Avaliação
+      {/* 🎯 3. VALOR DO LANCE - PRIMÁRIO */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+          Valor do Lance
         </label>
         {rangesLoading ? (
           <div className="space-y-4">
