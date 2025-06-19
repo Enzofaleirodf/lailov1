@@ -218,13 +218,13 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
               } text-gray-500 leading-tight ${
                 viewMode === 'vertical' ? 'mb-2' : ''
               } ${viewMode === 'horizontal' ? 'flex items-center gap-1' : 'line-clamp-2'}`}>
-                {/* ✅ CORREÇÃO: Endereço trunca, cidade/estado nunca trunca */}
+                {/* ✅ CORREÇÃO: Endereço + cidade/estado colados à esquerda */}
                 {subtitleParts && viewMode === 'horizontal' ? (
                   <>
-                    <span className="truncate min-w-0 flex-1">{subtitleParts.address}</span>
+                    <span className="truncate min-w-0">{subtitleParts.address}</span>
                     {subtitleParts.cityState && (
                       <>
-                        <span className="flex-shrink-0">–</span>
+                        <span className="flex-shrink-0"> – </span>
                         <span className="flex-shrink-0">{subtitleParts.cityState}</span>
                       </>
                     )}

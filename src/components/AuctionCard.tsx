@@ -171,7 +171,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
       };
     } else {
       // ✅ CORREÇÃO: Property card data com truncamento específico
-      const propertyType = auction.property_category || "Imóvel"; // ✅ USAR property_category
+      const propertyType = auction.property_type || "Imóvel"; // ✅ USAR property_type
       const area = auction.useful_area_m2 ? `${auction.useful_area_m2}m²` : undefined;
       const address = auction.property_address || 'Endereço não informado';
       const city = auction.city || 'N/A';
@@ -210,7 +210,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
     auction.year,
     auction.city,
     auction.state,
-    auction.property_category, // ✅ CORREÇÃO: Usar property_category em vez de property_type
+    auction.property_type, // ✅ CORREÇÃO: Usar property_type
     auction.property_address,
     auction.useful_area_m2,
     // ✅ NOVO: Removido appraised_value das dependências pois não é mais exibido
