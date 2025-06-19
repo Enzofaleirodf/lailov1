@@ -218,7 +218,20 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
               } text-gray-500 leading-tight ${
                 viewMode === 'vertical' ? 'mb-2' : ''
               } ${viewMode === 'horizontal' ? 'line-clamp-1' : 'line-clamp-2'}`}>
-                {subtitle}
+                {/* ✅ CORREÇÃO: Renderizar endereço com truncate correto para imóveis */}
+                {subtitleParts ? (
+                  <>
+                    <span className={subtitleTruncate === 'address' ? 'truncate' : ''}>{subtitleParts.address}</span>
+                    {subtitleParts.cityState && (
+                      <>
+                        <span> – </span>
+                        <span>{subtitleParts.cityState}</span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  subtitle
+                )}
               </div>
             </div>
 
