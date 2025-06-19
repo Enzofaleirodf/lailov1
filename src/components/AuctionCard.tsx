@@ -162,7 +162,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
         title: `${brand} ${model}`, // model pode truncar
         subtitle: `${color} • ${year} • ${city}, ${state}`, // Fallback para compatibilidade
         subtitleParts, // ✅ NOVO: Partes separadas para estilização
-        metadata: undefined, // Vehicles don't show appraised value
+        metadata: auction.appraised_value ? `Avaliado em ${formatCurrency(auction.appraised_value)}` : undefined, // 🎯 HIERARQUIA: Mostrar valor de avaliação
         tags,
         discountText,
         // ✅ NOVO: Flags para controle de truncamento
@@ -194,7 +194,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
         titleParts, // ✅ NOVO: Partes separadas para estilização
         subtitle: `${address} – ${city}, ${state}`, // Fallback para compatibilidade
         subtitleParts, // ✅ NOVO: Partes separadas para estilização
-        metadata: undefined, // ✅ NOVO: Não mostrar valor de avaliação, apenas lance inicial
+        metadata: auction.appraised_value ? `Avaliado em ${formatCurrency(auction.appraised_value)}` : undefined, // 🎯 HIERARQUIA: Mostrar valor de avaliação
         tags,
         discountText,
         // ✅ NOVO: Flags para controle de truncamento
@@ -213,7 +213,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
     auction.property_type, // ✅ CORREÇÃO: Usar property_type
     auction.property_address,
     auction.useful_area_m2,
-    // ✅ NOVO: Removido appraised_value das dependências pois não é mais exibido
+    auction.appraised_value, // 🎯 HIERARQUIA: Adicionado de volta para mostrar valor de avaliação
     auction.origin,
     auction.stage,
     discount,

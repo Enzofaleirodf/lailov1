@@ -88,10 +88,10 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
   
   const ImageContainer = () => (
     <div className={`relative overflow-hidden rounded-xl flex-shrink-0 bg-gray-100 ${
-      viewMode === 'horizontal' ? 'w-[94px] md:w-28 h-[60px] md:h-[72px]' : 'mb-4'
+      viewMode === 'horizontal' ? 'w-[94px] md:w-28 h-[76px] md:h-[84px]' : 'mb-4'
     }`}>
       <div className={`w-full ${
-        viewMode === 'horizontal' ? 'h-[60px] md:h-[72px]' : 'aspect-[16/9]'
+        viewMode === 'horizontal' ? 'h-[76px] md:h-[84px]' : 'aspect-[16/9]'
       }`}>
         {!imageError && imageUrl ? (
           <>
@@ -118,22 +118,39 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
         )}
       </div>
       
-      {/* Badge "Novo" */}
-      <div className={`absolute ${
-        viewMode === 'horizontal' 
-          ? 'top-1.5 left-1.5 md:top-2 md:left-2' 
-          : 'top-3 left-3'
-      } bg-gradient-to-r from-yellow-400 to-orange-400 text-white ${
-        viewMode === 'horizontal' ? 'text-[10px]' : 'text-xs'
-      } font-bold uppercase ${
-        viewMode === 'horizontal' 
-          ? 'px-1.5 py-0.5 md:px-2 md:py-0.5' 
-          : 'px-2.5 py-1'
-      } rounded-md shadow-sm transition-opacity duration-200 ${
-        isNew ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}>
-        Novo
-      </div>
+      {/* 🔥 BADGE DE DESCONTO - POSIÇÃO ABSOLUTA SOBRE IMAGEM */}
+      {discount && (
+        <div className={`absolute ${
+          viewMode === 'horizontal'
+            ? 'top-1 right-1'
+            : 'top-3 left-3'
+        } bg-red-600 text-white ${
+          viewMode === 'horizontal' ? 'text-[9px]' : 'text-xs'
+        } font-bold uppercase ${
+          viewMode === 'horizontal'
+            ? 'px-1.5 py-0.5'
+            : 'px-2.5 py-1'
+        } rounded-md shadow-md`}>
+          {viewMode === 'horizontal' ? `-${discount.replace('% OFF', '%')}` : discount}
+        </div>
+      )}
+
+      {/* 💙 BADGE "NOVO" - POSIÇÃO ABSOLUTA SOBRE IMAGEM */}
+      {isNew && (
+        <div className={`absolute ${
+          viewMode === 'horizontal'
+            ? 'top-1.5 left-1.5 md:top-2 md:left-2'
+            : 'top-3 right-3'
+        } bg-blue-600 text-white ${
+          viewMode === 'horizontal' ? 'text-[9px]' : 'text-xs'
+        } font-bold uppercase ${
+          viewMode === 'horizontal'
+            ? 'px-1.5 py-0.5 md:px-2 md:py-0.5'
+            : 'px-2.5 py-1'
+        } rounded-md shadow-sm`}>
+          NOVO
+        </div>
+      )}
       
       {/* Favorite Button - Only for vertical */}
       {viewMode === 'vertical' && onToggleFavorite && (
@@ -177,7 +194,7 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
       }`}>
         <div className={`flex-1 min-w-0 ${
           viewMode === 'horizontal'
-            ? 'h-[60px] flex flex-col justify-between'
+            ? 'h-[76px] flex flex-col justify-between'
             : ''
         }`}>
           {/* Title and Favorite (horizontal only) */}
@@ -190,8 +207,8 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
                   ? 'text-[13px] md:text-sm'
                   : 'text-lg md:text-base'
               } font-bold text-gray-900 leading-tight ${
-                // ✅ CORREÇÃO: Diminuir 3px entre título e endereço para imóveis mobile horizontal
-                viewMode === 'horizontal' && titleParts ? 'mb-0 md:mb-1' : 'mb-1'
+                // ✅ CORREÇÃO: Diminuir espaçamento entre título e conteúdo
+                viewMode === 'horizontal' && titleParts ? 'mb-0 md:mb-0' : 'mb-1'
               } ${
                 titleTruncate ? 'truncate' : ''
               }`}>
@@ -273,35 +290,31 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
             )}
           </div>
 
-          {/* Price and Metadata */}
-          <div className={`flex items-baseline gap-1.5 flex-shrink-0 ${
-            viewMode === 'horizontal' ? 'mt-0 md:mt-2' : 'mb-3 mt-auto'
+          {/* 🎯 HIERARQUIA VISUAL PERFEITA */}
+          <div className={`flex flex-col ${
+            viewMode === 'horizontal' ? 'gap-0' : 'gap-1'
+          } flex-shrink-0 ${
+            viewMode === 'horizontal' ? 'mt-1 md:mt-2' : 'mb-3 mt-auto'
           }`}>
-            <span className={`${
-              viewMode === 'horizontal' 
-                ? 'text-[15px] md:text-lg' 
-                : 'text-xl md:text-lg'
-            } font-bold text-gray-900 leading-tight`}>
-              {price}
-            </span>
-            
+            {/* 1️⃣ VALOR DO LANCE (Principal) */}
+            <div className="flex items-baseline gap-2">
+              <span className={`${
+                viewMode === 'horizontal'
+                  ? 'text-lg font-bold' // 📱 Mobile: text-lg (18px) - +2px
+                  : 'text-2xl font-bold'  // 💻 Desktop: text-2xl (24px)
+              } text-gray-900 leading-tight`}>
+                {price}
+              </span>
+            </div>
+
+            {/* 2️⃣ VALOR DE AVALIAÇÃO (Contexto) - Logo abaixo do valor do lance */}
             {metadata && (
               <span className={`${
-                viewMode === 'horizontal' 
-                  ? 'text-[10px] md:text-xs' 
-                  : 'text-sm md:text-xs'
-              } text-gray-500`}>
+                viewMode === 'horizontal'
+                  ? 'text-[10px]'  // 📱 Mobile: text-[10px] (10px)
+                  : 'text-sm'      // 💻 Desktop: text-sm (14px)
+              } text-gray-500 font-medium`}>
                 {metadata}
-              </span>
-            )}
-            
-            {discount && (
-              <span className={`bg-gradient-to-r from-green-500 to-green-600 text-white ${
-                viewMode === 'horizontal' 
-                  ? 'text-[10px] md:text-xs px-1.5 py-0.5 md:px-2 md:py-0.5' 
-                  : 'text-xs px-2.5 py-1'
-              } font-bold uppercase rounded-md shadow-sm`}>
-                {discount}
               </span>
             )}
           </div>
@@ -312,11 +325,12 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
 
   const FooterArea = () => (
     <>
-      <div className="h-px bg-gray-100 mb-3"></div>
+      <div className="h-px bg-gray-100 mb-2"></div>
       
       <div className={`flex items-center justify-between ${
         viewMode === 'vertical' ? 'pt-3' : ''
       }`}>
+        {/* 3️⃣ BADGES (Ordem: Etapa → Origem) - Cinzas semânticos */}
         <div className="flex flex-wrap gap-1.5">
           {tags && tags.slice(0, viewMode === 'vertical' ? 2 : undefined).map((tag, index) => (
             <span
@@ -325,7 +339,11 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
                 viewMode === 'horizontal'
                   ? 'text-[11px] md:text-xs px-2 py-1 md:px-2.5 md:py-1'
                   : 'text-xs px-2.5 py-1'
-              } bg-gray-50 text-gray-700 rounded-md font-medium border border-gray-100`}
+              } ${
+                index === 0
+                  ? 'bg-gray-100 text-gray-700'  // 🎯 Etapa: Cinza neutro, informativo
+                  : 'bg-gray-50 text-gray-600'   // 🏷️ Origem: Cinza neutro, menos importante
+              } rounded-md font-medium border border-gray-200`}
             >
               {tag}
             </span>
@@ -360,10 +378,10 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
 
   // ===== RENDER =====
   return (
-    <div className="group w-full bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-lg hover:border-gray-200 transition-all duration-300 p-3 md:p-4 cursor-pointer">
+    <div className="group w-full bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300 p-2.5 md:p-3 cursor-pointer">
       {viewMode === 'horizontal' ? (
         <>
-          <div className="flex gap-3 md:gap-4 mb-3">
+          <div className="flex gap-2.5 md:gap-3 mb-3">
             <ImageContainer />
             <ContentArea />
           </div>
