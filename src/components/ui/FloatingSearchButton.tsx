@@ -59,7 +59,7 @@ export const FloatingSearchButton: React.FC<FloatingSearchButtonProps> = ({
         // Collapsed search button
         <button
           onClick={handleToggle}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors"
+          className="bg-gray-900 hover:bg-black text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
         >
           <Search className="w-5 h-5" />
         </button>
