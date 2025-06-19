@@ -39,9 +39,9 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const sizeClasses = {
-    sm: 'h-8 text-xs',
-    md: 'h-10 text-sm',
-    lg: 'h-12 text-base'
+    sm: 'h-10 text-xs',
+    md: 'h-12 text-sm',
+    lg: 'h-14 text-base'
   };
 
   const containerSizeClasses = {
@@ -111,7 +111,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
     <div
       ref={containerRef}
       className={cn(
-        'relative flex items-center rounded-lg border border-gray-200 bg-gray-100/80 w-full',
+        'relative flex items-center rounded-xl border border-gray-200 bg-transparent w-full',
         containerSizeClasses[size],
         disabled && 'opacity-50 cursor-not-allowed',
         className
@@ -122,7 +122,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
       {/* Active indicator */}
       <div
         className={cn(
-          'absolute rounded-md bg-blue-600 shadow-lg border border-blue-700/20',
+          'absolute rounded-xl bg-blue-600 shadow-lg border border-blue-700/20',
           size === 'lg' ? 'top-1.5 left-1.5' : 'top-1 left-1'
         )}
         style={indicatorStyle}
@@ -139,7 +139,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
           aria-disabled={option.disabled || disabled}
           tabIndex={selectedValue === option.id ? 0 : -1}
           className={cn(
-            'relative z-10 flex items-center justify-center gap-2 font-medium transition-all duration-200 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white flex-1 px-4',
+            'relative z-10 flex items-center justify-center gap-2 font-medium transition-all duration-200 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white flex-1 px-4',
             sizeClasses[size],
             selectedValue === option.id
               ? 'text-white font-semibold'

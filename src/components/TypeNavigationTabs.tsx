@@ -195,13 +195,9 @@ export const TypeNavigationTabs: React.FC<TypeNavigationTabsProps> = React.memo(
       {/* Desktop version */}
       <div className="hidden min-[768px]:block">
         <div className="relative w-full">
-          <div 
+          <div
             ref={tabsContainerRef}
-            className="absolute inset-0 flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 py-3"
-            style={{
-              maskImage: 'linear-gradient(to right, black 0%, black calc(100% - 100px), transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to right, black 0%, black calc(100% - 100px), transparent 100%)'
-            }}
+            className="absolute inset-0 flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 py-3 pr-20"
           >
             {tabs.map((tab) => (
               <TabButton
@@ -212,7 +208,10 @@ export const TypeNavigationTabs: React.FC<TypeNavigationTabsProps> = React.memo(
             ))}
           </div>
           
-          <div className="absolute top-0 right-0 bottom-0 w-24 flex items-center justify-end gap-1 bg-gradient-to-l from-white via-white/95 to-transparent z-20 pr-2">
+          {/* Gradiente suave para transição visual */}
+          <div className="absolute top-0 right-20 bottom-0 w-8 bg-gradient-to-l from-white/80 to-transparent pointer-events-none z-10"></div>
+
+          <div className="absolute top-0 right-0 bottom-0 w-20 flex items-center justify-end gap-1 bg-white z-20 pr-1">
             <button
               onClick={handleScrollLeft}
               className="w-8 h-8 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow active:scale-95"

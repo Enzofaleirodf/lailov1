@@ -17,16 +17,14 @@ export const useActiveFilters = ({ category, appliedFilters }: UseActiveFiltersP
         (filters.marca && filters.marca !== "all") ||
         (filters.modelo && filters.modelo !== "all") ||
         (filters.cor && filters.cor !== "all") ||
-        filters.ano[0] !== FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_YEAR.MIN ||
-        filters.ano[1] !== FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_YEAR.MAX ||
-        filters.preco[0] !== FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_PRICE.MIN ||
-        filters.preco[1] !== FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_PRICE.MAX
+        // ✅ CORREÇÃO: Só considerar ativo se não estiver no estado inicial [0,0]
+        !(filters.ano[0] === 0 && filters.ano[1] === 0) ||
+        !(filters.preco[0] === 0 && filters.preco[1] === 0)
       )) ||
       (category === 'imoveis' && (
-        filters.area[0] !== FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_AREA.MIN ||
-        filters.area[1] !== FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_AREA.MAX ||
-        filters.valor[0] !== FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_VALUE.MIN ||
-        filters.valor[1] !== FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_VALUE.MAX
+        // ✅ CORREÇÃO: Só considerar ativo se não estiver no estado inicial [0,0]
+        !(filters.area[0] === 0 && filters.area[1] === 0) ||
+        !(filters.valor[0] === 0 && filters.valor[1] === 0)
       ))
     );
     

@@ -45,20 +45,29 @@ export const StatusHeader: React.FC<StatusHeaderProps> = ({
 
   return (
     <div className="flex flex-col min-[768px]:flex-row min-[768px]:items-center min-[768px]:justify-between py-4 gap-3 w-full">
-      <div className="min-w-0 flex-1">
+      {/* Mobile Layout: Status + Toggle */}
+      <div className="min-[768px]:hidden flex items-center justify-between gap-3 w-full min-w-0">
+        <div className="min-w-0 flex-1">
+          <p className="text-gray-600 text-sm break-words">
+            {statusText}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs max-[399px]:text-[11px] text-gray-600 whitespace-nowrap">Encerrados</span>
+          <Switch
+            checked={showExpiredAuctions}
+            onCheckedChange={onExpiredToggle}
+            size="sm"
+            className="max-[399px]:w-7 max-[399px]:h-3.5"
+          />
+        </div>
+      </div>
+
+      {/* Desktop Layout: Status only */}
+      <div className="hidden min-[768px]:block min-w-0 flex-1">
         <p className="text-gray-600 text-sm break-words">
           {statusText}
         </p>
-      </div>
-
-      {/* Mobile Switch for Expired Auctions (< 768px) */}
-      <div className="flex min-[768px]:hidden items-center justify-end gap-2">
-        <span className="text-sm text-gray-600">Encerrados</span>
-        <Switch
-          checked={showExpiredAuctions}
-          onCheckedChange={onExpiredToggle}
-          size="sm"
-        />
       </div>
 
       {/* Desktop Sort Control Only (768px+) */}
@@ -72,7 +81,7 @@ export const StatusHeader: React.FC<StatusHeaderProps> = ({
             <ChevronDown className="w-4 h-4" />
           </button>
 
-          {/* Desktop Sort Popover */}
+          {/* Desktop Sort Popover - Only show on desktop when popover is open */}
           <SortPopover
             isOpen={showSortPopover}
             onClose={onSortClose}

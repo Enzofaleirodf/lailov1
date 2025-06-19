@@ -353,6 +353,8 @@ export async function processRealAuctions(
         ]);
 
         processedAuctions = properties.map(convertPropertyToAuction);
+        // ✅ CORREÇÃO: Aplicar ordenação para todas as opções
+        processedAuctions = applySorting(processedAuctions, sort);
         totalCount = count;
       }
     } else {
@@ -440,6 +442,8 @@ export async function processRealAuctions(
         ]);
 
         processedAuctions = vehicles.map(convertVehicleToAuction);
+        // ✅ CORREÇÃO: Aplicar ordenação para todas as opções
+        processedAuctions = applySorting(processedAuctions, sort);
         totalCount = count;
       }
     }

@@ -97,7 +97,7 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
       onEtapaChange={handleEtapaChange}
     >
       {/* Filtros específicos de imóveis */}
-      
+
       {/* Área */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -125,10 +125,13 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
         )}
       </div>
 
-      {/* Valor do lance inicial */}
+      {/* Divider */}
+      <div className="h-px bg-gray-200 my-6"></div>
+
+      {/* Valor de Avaliação */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">
-          Valor do lance inicial
+          Valor de Avaliação
         </label>
         {rangesLoading ? (
           <div className="space-y-4">

@@ -102,8 +102,14 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
         </div>
       </div>
 
+      {/* Divider */}
+      <div className="h-px bg-gray-200 my-6"></div>
+
       {/* Filtros específicos da categoria (área, marca, etc.) */}
       {children}
+
+      {/* Divider */}
+      <div className="h-px bg-gray-200 my-6"></div>
 
       {/* Formato */}
       <FormatToggle
@@ -112,6 +118,9 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
         options={formatos} // ✅ NOVO: Passar opções condicionais
         disabled={loading}
       />
+
+      {/* Divider */}
+      <div className="h-px bg-gray-200 my-6"></div>
 
       {/* Origem */}
       <div>
@@ -125,6 +134,9 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
           disabled={loading}
         />
       </div>
+
+      {/* Divider */}
+      <div className="h-px bg-gray-200 my-6"></div>
 
       {/* Etapa */}
       <div>

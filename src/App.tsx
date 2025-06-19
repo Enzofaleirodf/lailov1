@@ -107,10 +107,10 @@ function App() {
               <Route path="/leiloeiros" element={<div className="p-8 text-center">Leiloeiros - Em desenvolvimento</div>} />
               
               {/* Default redirect */}
-              <Route path="/" element={<Navigate to="/buscador/veiculos/todos" replace />} />
-              
+              <Route path="/" element={<Navigate to="/buscador/imoveis/todos" replace />} />
+
               {/* 404 for invalid routes */}
-              <Route path="*" element={<Navigate to="/buscador/veiculos/todos" replace />} />
+              <Route path="*" element={<Navigate to="/buscador/imoveis/todos" replace />} />
             </Routes>
             
             {/* Navigation Components - Only show on non-auth pages */}

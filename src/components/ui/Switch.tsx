@@ -4,7 +4,7 @@ interface SwitchProps {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
   className?: string;
 }
 
@@ -16,6 +16,11 @@ export const Switch: React.FC<SwitchProps> = ({
   className = ''
 }) => {
   const sizeClasses = {
+    xs: {
+      container: 'w-7 h-3.5',
+      thumb: 'w-2.5 h-2.5',
+      translate: 'translate-x-3.5'
+    },
     sm: {
       container: 'w-8 h-4',
       thumb: 'w-3 h-3',

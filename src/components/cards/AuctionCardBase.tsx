@@ -88,19 +88,28 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
   
   const ImageContainer = () => (
     <div className={`relative overflow-hidden rounded-xl flex-shrink-0 bg-gray-100 ${
-      viewMode === 'horizontal' ? 'w-20 md:w-24' : 'mb-4'
+      viewMode === 'horizontal' ? 'w-[94px] md:w-28 h-[60px] md:h-[72px]' : 'mb-4'
     }`}>
       <div className={`w-full ${
-        viewMode === 'horizontal' ? 'aspect-[4/3]' : 'aspect-[16/9]'
+        viewMode === 'horizontal' ? 'h-[60px] md:h-[72px]' : 'aspect-[16/9]'
       }`}>
         {!imageError && imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            onError={() => setImageError(true)}
-          />
+          <>
+            <img
+              src={imageUrl}
+              alt={title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+              onError={() => setImageError(true)}
+            />
+            {/* Gradiente sutil do topo e base para o meio */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.15) 100%)'
+              }}
+            />
+          </>
         ) : (
           <PlaceholderImage
             type={getImageType()}
@@ -167,8 +176,8 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
         viewMode === 'horizontal' ? '' : 'flex-1'
       }`}>
         <div className={`flex-1 min-w-0 ${
-          viewMode === 'horizontal' 
-            ? 'h-[68px] flex flex-col justify-between' 
+          viewMode === 'horizontal'
+            ? 'h-[60px] flex flex-col justify-between'
             : ''
         }`}>
           {/* Title and Favorite (horizontal only) */}
@@ -180,7 +189,10 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
                 viewMode === 'horizontal'
                   ? 'text-[13px] md:text-sm'
                   : 'text-lg md:text-base'
-              } font-bold text-gray-900 leading-tight mb-1 ${
+              } font-bold text-gray-900 leading-tight ${
+                // ✅ CORREÇÃO: Diminuir 3px entre título e endereço para imóveis mobile horizontal
+                viewMode === 'horizontal' && titleParts ? 'mb-0 md:mb-1' : 'mb-1'
+              } ${
                 titleTruncate ? 'truncate' : ''
               }`}>
                 {/* ✅ CORREÇÃO: Renderizar título com área estilizada para imóveis */}
@@ -199,20 +211,15 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
                 )}
               </h3>
               
-              {/* ✅ CORREÇÃO: Renderizar subtitle simples sem truncamento complexo */}
-              <p className={`${
+              <div className={`${
                 viewMode === 'horizontal'
                   ? 'text-[11px] md:text-xs'
                   : 'text-sm md:text-xs'
-              } text-gray-500 ${
-                subtitleTruncate
-                  ? 'truncate'
-                  : viewMode === 'horizontal' ? 'line-clamp-1' : 'line-clamp-2'
-              } leading-tight ${
+              } text-gray-500 leading-tight ${
                 viewMode === 'vertical' ? 'mb-2' : ''
-              }`}>
+              } ${viewMode === 'horizontal' ? 'line-clamp-1' : 'line-clamp-2'}`}>
                 {subtitle}
-              </p>
+              </div>
             </div>
 
             {/* Favorite Button - Only for horizontal */}
@@ -237,7 +244,7 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
 
           {/* Price and Metadata */}
           <div className={`flex items-baseline gap-1.5 flex-shrink-0 ${
-            viewMode === 'horizontal' ? 'mt-1 md:mt-2' : 'mb-3 mt-auto'
+            viewMode === 'horizontal' ? 'mt-0 md:mt-2' : 'mb-3 mt-auto'
           }`}>
             <span className={`${
               viewMode === 'horizontal' 
@@ -285,7 +292,7 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
               key={index}
               className={`${
                 viewMode === 'horizontal'
-                  ? 'text-[10px] md:text-xs px-2 py-1 md:px-2.5 md:py-1'
+                  ? 'text-[11px] md:text-xs px-2 py-1 md:px-2.5 md:py-1'
                   : 'text-xs px-2.5 py-1'
               } bg-gray-50 text-gray-700 rounded-md font-medium border border-gray-100`}
             >
@@ -297,8 +304,8 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
         <div className="flex items-center gap-2">
           {date && (
             <div className={`${
-              viewMode === 'horizontal' 
-                ? 'text-[10px] md:text-xs' 
+              viewMode === 'horizontal'
+                ? 'text-[11px] md:text-xs'
                 : 'text-xs'
             } text-gray-500 font-medium`}>
               {date}
@@ -310,7 +317,7 @@ export const AuctionCardBase: React.FC<BaseCardProps> = ({
                 e.stopPropagation();
                 onLink();
               }}
-              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 active:scale-95"
+              className="p-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 active:scale-95"
             >
               <ArrowUpRight className="w-4 h-4" />
             </button>

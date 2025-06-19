@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FilterSidebar } from '../components/FilterSidebar';
-import { SortPopover } from '../components/SortPopover';
+import { MobileSortModal } from '../components/MobileSortModal';
 import { TypeNavigationTabs } from '../components/TypeNavigationTabs';
 import { Pagination } from '../components/Pagination';
 import { EmptyState } from '../components/EmptyState';
@@ -28,7 +28,8 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
   
   // Estados locais (não persistidos)
   const [showFilters, setShowFilters] = useState(false);
-  const [showSortPopover, setShowSortPopover] = useState(false);
+  const [showDesktopSort, setShowDesktopSort] = useState(false);
+  const [showMobileSort, setShowMobileSort] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [currentPage, setCurrentPage] = useState(1); // ✅ PAGINAÇÃO REAL: Estado da página atual
 
@@ -60,6 +61,35 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
     category,
     appliedFilters: state.appliedFilters
   });
+
+  // Calcular número de filtros ativos para badge
+  const activeFiltersCount = (() => {
+    const filters = category === 'imoveis' ? state.appliedFilters.imoveis : state.appliedFilters.veiculos;
+    let count = 0;
+
+    if (filters.estado && filters.estado !== "all") count++;
+    if (filters.cidade && filters.cidade !== "all") count++;
+    if (filters.formato) count++;
+    if (filters.origem.length > 0) count++;
+    if (filters.etapa.length > 0) count++;
+
+    if (category === 'veiculos') {
+      if (filters.marca && filters.marca !== "all") count++;
+      if (filters.modelo && filters.modelo !== "all") count++;
+      if (filters.cor && filters.cor !== "all") count++;
+      // ✅ CORREÇÃO: Só contar se não estiver no estado inicial [0,0]
+      if (!(filters.ano[0] === 0 && filters.ano[1] === 0)) count++;
+      if (!(filters.preco[0] === 0 && filters.preco[1] === 0)) count++;
+    } else {
+      // ✅ CORREÇÃO: Só contar se não estiver no estado inicial [0,0]
+      if (!(filters.area[0] === 0 && filters.area[1] === 0)) count++;
+      if (!(filters.valor[0] === 0 && filters.valor[1] === 0)) count++;
+    }
+
+    if (state.searchQuery && state.searchQuery.trim() !== '') count++;
+
+    return count;
+  })();
 
   // ✅ PAGINAÇÃO REAL: Calcular total de páginas baseado no total de resultados do banco
   const totalPages = totalCount ? Math.ceil(totalCount / PAGINATION_CONFIG.ITEMS_PER_PAGE) : 0;
@@ -103,23 +133,24 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
 
   const handleSortChange = (sort: SortOption) => {
     actions.setSortOption(sort);
-    setShowSortPopover(false);
+    setShowDesktopSort(false);
+    setShowMobileSort(false);
   };
 
   // Close sort popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showSortPopover) {
+      if (showDesktopSort) {
         const target = event.target as Element;
         if (!target.closest('[data-sort-container]')) {
-          setShowSortPopover(false);
+          setShowDesktopSort(false);
         }
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showSortPopover]);
+  }, [showDesktopSort]);
 
   // Show loading state
   if (loading) {
@@ -140,9 +171,11 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
           onSearchToggle={handleSearchToggle}
           onSearchChange={actions.setSearchQuery}
           onSearchSubmit={handleSearchSubmit}
-          onSortClick={() => setShowSortPopover(true)}
+          onSortClick={() => setShowMobileSort(true)}
           onFiltersClick={() => setShowFilters(true)}
           onViewModeChange={actions.setViewMode}
+          hasActiveFilters={hasActiveFilters}
+          activeFiltersCount={activeFiltersCount}
         />
 
         <div className="flex flex-1 min-h-0 overflow-x-hidden">
@@ -197,9 +230,11 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
           onSearchToggle={handleSearchToggle}
           onSearchChange={actions.setSearchQuery}
           onSearchSubmit={handleSearchSubmit}
-          onSortClick={() => setShowSortPopover(true)}
+          onSortClick={() => setShowMobileSort(true)}
           onFiltersClick={() => setShowFilters(true)}
           onViewModeChange={actions.setViewMode}
+          hasActiveFilters={hasActiveFilters}
+          activeFiltersCount={activeFiltersCount}
         />
 
         <div className="flex flex-1 min-h-0 overflow-x-hidden">
@@ -266,9 +301,11 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
         onSearchToggle={handleSearchToggle}
         onSearchChange={actions.setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
-        onSortClick={() => setShowSortPopover(true)}
+        onSortClick={() => setShowMobileSort(true)}
         onFiltersClick={() => setShowFilters(true)}
         onViewModeChange={actions.setViewMode}
+        hasActiveFilters={hasActiveFilters}
+        activeFiltersCount={activeFiltersCount}
       />
 
       <div className="flex flex-1 min-h-0 overflow-x-hidden">
@@ -300,11 +337,11 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
                   totalSites={totalSites}
                   newAuctions={newAuctions}
                   sortOption={state.sortOption}
-                  showSortPopover={showSortPopover}
+                  showSortPopover={showDesktopSort}
                   showExpiredAuctions={state.showExpiredAuctions}
-                  onSortToggle={() => setShowSortPopover(!showSortPopover)}
+                  onSortToggle={() => setShowDesktopSort(!showDesktopSort)}
                   onSortChange={handleSortChange}
-                  onSortClose={() => setShowSortPopover(false)}
+                  onSortClose={() => setShowDesktopSort(false)}
                   onExpiredToggle={actions.setShowExpiredAuctions}
                 />
               )}
@@ -350,16 +387,13 @@ export const BuscadorListingPage: React.FC<BuscadorListingPageProps> = ({ catego
         currentPropertyType={category === 'imoveis' ? (tipo || 'todos') : undefined}
       />
 
-      {/* Mobile Sort Popover */}
-      <div className="min-[768px]:hidden">
-        <SortPopover
-          isOpen={showSortPopover}
-          onClose={() => setShowSortPopover(false)}
-          selectedSort={state.sortOption}
-          onSortChange={handleSortChange}
-          isMobile={true}
-        />
-      </div>
+      {/* Mobile Sort Modal */}
+      <MobileSortModal
+        isOpen={showMobileSort}
+        onClose={() => setShowMobileSort(false)}
+        selectedSort={state.sortOption}
+        onSortChange={handleSortChange}
+      />
 
       {/* Desktop Floating Search Button */}
       <FloatingSearchButton

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Category } from '../types/auction';
 import { ImoveisFilters } from './filters/ImoveisFilters';
@@ -31,9 +31,47 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const [isApplying, setIsApplying] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
+  // ✅ NOVO: Salvar estado inicial dos filtros quando abrir o modal
+  const [initialFilters, setInitialFilters] = useState(() => {
+    return category === 'imoveis'
+      ? { ...state.stagedFilters.imoveis }
+      : { ...state.stagedFilters.veiculos };
+  });
+
+  // ✅ NOVO: Atualizar filtros iniciais quando o modal abrir
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      setInitialFilters(
+        category === 'imoveis'
+          ? { ...state.stagedFilters.imoveis }
+          : { ...state.stagedFilters.veiculos }
+      );
+    }
+  }, [isOpen, isMobile, category, state.stagedFilters]);
+
   // ✅ CONTAGEM DINÂMICA: Buscar quantos leilões serão mostrados com os filtros atuais
   const stagedFilters = category === 'imoveis' ? state.stagedFilters.imoveis : state.stagedFilters.veiculos;
   const currentType = category === 'imoveis' ? currentPropertyType : currentVehicleType;
+
+  // ✅ NOVO: Função para resetar filtros e voltar ao topo
+  const handleModalClose = () => {
+    if (isMobile) {
+      // Resetar filtros para o estado inicial
+      if (category === 'imoveis') {
+        actions.setStagedImoveisFilters(initialFilters);
+      } else {
+        actions.setStagedVeiculosFilters(initialFilters);
+      }
+
+      // Scroll para o topo do modal
+      const modalContent = document.querySelector('[data-filter-modal-content]');
+      if (modalContent) {
+        modalContent.scrollTop = 0;
+      }
+    }
+
+    onClose?.();
+  };
   const { count, loading: countLoading, hasUserFilters } = useFilterCount(
     category,
     currentType,
@@ -107,7 +145,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <div
             className="fixed inset-0 bg-black/50"
             style={{ zIndex: UI_CONFIG.Z_INDEX.MODAL_BACKDROP }}
-            onClick={onClose}
+            onClick={handleModalClose}
           />
         )}
         
@@ -119,23 +157,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           style={{ zIndex: UI_CONFIG.Z_INDEX.FILTER_SIDEBAR }}
         >
           {/* Header */}
-          <div 
-            className="flex items-center justify-between p-4 border-b border-gray-200 bg-white flex-shrink-0 relative"
+          <div
+            className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0 relative"
             style={{ zIndex: UI_CONFIG.Z_INDEX.FILTER_SIDEBAR + 10 }}
           >
             <div className="flex items-center justify-between flex-1">
               <h2 className="text-lg font-semibold text-gray-900">Filtros</h2>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Encerrados</span>
-                <Switch
-                  checked={state.showExpiredAuctions}
-                  onCheckedChange={actions.setShowExpiredAuctions}
-                  size="sm"
-                />
-              </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleModalClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
               style={{ zIndex: UI_CONFIG.Z_INDEX.FILTER_SIDEBAR + 10 }}
             >
@@ -145,8 +175,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
           {/* Filters content */}
           <div
-            className="flex-1 overflow-y-auto p-4 scrollbar-hide relative"
+            className="flex-1 overflow-y-auto px-6 py-4 scrollbar-hide relative"
             style={{ zIndex: UI_CONFIG.Z_INDEX.FILTER_SIDEBAR + 5 }}
+            data-filter-modal-content
           >
             {/* ✅ CORREÇÃO: Mostrar apenas filtros APLICADOS */}
             <FilterTags
@@ -167,26 +198,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
 
           {/* Footer */}
-          <div 
-            className="p-4 border-t border-gray-200 bg-white flex-shrink-0 relative"
+          <div
+            className="px-6 py-4 border-t border-gray-200 bg-white flex-shrink-0 relative shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
             style={{ zIndex: UI_CONFIG.Z_INDEX.FILTER_SIDEBAR + 10 }}
           >
-            <div className="flex gap-3">
-              <button
-                onClick={handleClearFilters}
-                disabled={isClearing || isApplying}
-                className={`flex-1 px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl transition-all duration-200 font-normal ${
-                  isClearing
-                    ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
-                    : 'hover:bg-gray-50 hover:border-gray-400 active:scale-[0.98]'
-                }`}
-              >
-                {isClearing ? 'Limpando...' : '• Limpar tudo'}
-              </button>
+            <div className="flex flex-col gap-3">
               <button
                 onClick={handleApplyFilters}
                 disabled={isApplying || isClearing || countLoading}
-                className={`flex-1 px-4 py-3 bg-gray-900 text-white rounded-xl transition-all duration-200 font-normal ${
+                className={`w-full px-4 py-3 bg-gray-900 text-white rounded-xl transition-all duration-200 font-normal ${
                   isApplying || countLoading
                     ? 'bg-gray-700 cursor-not-allowed'
                     : 'hover:bg-black active:scale-[0.98] shadow-sm hover:shadow-md'
@@ -198,6 +218,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     ? formatFilterCount(count, countLoading)
                     : 'Aplicar filtros'
                 }
+              </button>
+              <button
+                onClick={handleClearFilters}
+                disabled={isClearing || isApplying}
+                className={`w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl transition-all duration-200 font-normal ${
+                  isClearing
+                    ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
+                    : 'hover:bg-gray-50 hover:border-gray-400 active:scale-[0.98]'
+                }`}
+              >
+                {isClearing ? 'Limpando...' : 'Limpar filtros'}
               </button>
             </div>
           </div>
@@ -248,8 +279,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Footer */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 px-4 md:px-6 py-3 border-t border-gray-200 bg-white"
+      <div
+        className="absolute bottom-0 left-0 right-0 px-4 md:px-6 py-3 border-t border-gray-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
         style={{ zIndex: UI_CONFIG.Z_INDEX.DROPDOWN }}
       >
         <div className="flex gap-2">
@@ -262,7 +293,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 : 'hover:bg-gray-50 hover:border-gray-400 active:scale-[0.98]'
             }`}
           >
-            {isClearing ? 'Limpando...' : '• Limpar tudo'}
+            {isClearing ? 'Limpando...' : 'Limpar filtros'}
           </button>
           <button
             onClick={handleApplyFilters}

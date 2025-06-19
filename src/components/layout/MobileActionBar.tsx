@@ -13,6 +13,8 @@ interface MobileActionBarProps {
   onSortClick: () => void;
   onFiltersClick: () => void;
   onViewModeChange: (mode: ViewMode) => void;
+  hasActiveFilters?: boolean;
+  activeFiltersCount?: number;
 }
 
 // 🔧 CORREÇÃO: Remover React.memo desnecessário - componente simples
@@ -25,7 +27,9 @@ export const MobileActionBar: React.FC<MobileActionBarProps> = ({
   onSearchSubmit,
   onSortClick,
   onFiltersClick,
-  onViewModeChange
+  onViewModeChange,
+  hasActiveFilters = false,
+  activeFiltersCount = 0
 }) => {
   return (
     <div className="min-[768px]:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-30 h-16">
@@ -74,9 +78,18 @@ export const MobileActionBar: React.FC<MobileActionBarProps> = ({
               
               <button
                 onClick={onFiltersClick}
-                className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
+                className={`relative p-2.5 rounded-xl transition-colors ${
+                  hasActiveFilters
+                    ? 'text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0'
+                }`}
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {hasActiveFilters && activeFiltersCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                    {activeFiltersCount > 9 ? '9+' : activeFiltersCount}
+                  </span>
+                )}
               </button>
             </div>
             

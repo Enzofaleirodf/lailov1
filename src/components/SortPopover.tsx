@@ -38,49 +38,7 @@ export const SortPopover: React.FC<SortPopoverProps> = ({
     }
   };
 
-  // MOBILE VERSION - Apenas quando isMobile for explicitamente true
-  if (isMobile === true) {
-    return (
-      <>
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-          onClick={onClose}
-        />
-        
-        <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl z-50 p-6 shadow-2xl">
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6" />
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <ChevronDown className="w-5 h-5 text-blue-600" />
-              <h3 className="text-xl font-bold text-gray-900">Ordenar por</h3>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-          <div className="space-y-2">
-            {sortOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => handleSelect(option.value)}
-                className="w-full flex items-center justify-between px-4 py-4 text-left hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                <span className="text-gray-900 font-medium">{option.label}</span>
-                {selectedSort === option.value && (
-                  <Check className="w-5 h-5 text-blue-600" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // DESKTOP VERSION - Apenas um dropdown simples
+  // DESKTOP VERSION ONLY - Mobile agora usa MobileSortModal
   return (
     <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
       <div className="py-1">

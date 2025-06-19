@@ -98,7 +98,7 @@ export const ComboBoxSearch: React.FC<ComboBoxSearchProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between border-gray-200 hover:border-gray-300 rounded-xl relative z-10", className)}
+          className={cn("w-full justify-between border-gray-200 hover:border-gray-300 rounded-xl relative z-10 h-12", className)}
           disabled={disabled}
         >
           <span className={cn(
