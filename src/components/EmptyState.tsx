@@ -103,12 +103,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full blur-3xl opacity-60 scale-150"></div>
         
         {/* Container do ícone */}
-        <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-6 shadow-xl">
+        <div className="relative bg-gradient-to-br from-auction-500 to-auction-600 rounded-3xl p-6 shadow-xl">
           <IconComponent className="w-12 h-12 text-white" />
-          
-          {/* Elementos decorativos flutuantes */}
-          <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
-          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-green-400 rounded-full animate-bounce delay-300"></div>
+
+          {/* 🚀 UX CLEAN: Elementos decorativos estáticos elegantes */}
+          <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full opacity-60"></div>
+          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-success-400 rounded-full opacity-40"></div>
         </div>
       </div>
 

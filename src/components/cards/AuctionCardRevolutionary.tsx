@@ -55,7 +55,7 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
   if (isHorizontal) {
     // 📱 MOBILE HORIZONTAL - ULTRA COMPACTO
     return (
-      <div className="group bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-3 cursor-pointer">
+      <div className="group bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-3 cursor-pointer">
         <div className="flex gap-3">
           {/* 🖼️ IMAGEM PEQUENA (60x60) */}
           <div className="relative flex-shrink-0">
@@ -69,7 +69,7 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
             
             {/* 🔥 BADGE DE DESCONTO - POSIÇÃO ABSOLUTA SOBRE IMAGEM */}
             {discount && discount > 0 && (
-              <div className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md">
+              <div className="absolute -top-1 -right-1 bg-success-500 text-white font-bold rounded-lg shadow-md inline-flex items-center justify-center" style={{ fontSize: '10px', padding: '4px 6px', lineHeight: '1' }}>
                 -{discount}%
               </div>
             )}
@@ -132,14 +132,14 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
               <div className="flex items-center gap-1 flex-shrink-0">
                 {/* ✨ NOVO */}
                 {isNew && (
-                  <span className="bg-blue-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">
+                  <span className="bg-error-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">
                     NOVO
                   </span>
                 )}
                 
                 {/* 🎯 ETAPA (mais importante) */}
                 {stage && (
-                  <span className="bg-gray-100 text-gray-700 text-[8px] font-medium px-1.5 py-0.5 rounded">
+                  <span className="text-auction-700 text-[8px] font-medium px-1.5 py-0.5 rounded" style={{ backgroundColor: '#f0faff' }}>
                     {stage}
                   </span>
                 )}
@@ -151,7 +151,7 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
                       e.stopPropagation();
                       onLink();
                     }}
-                    className="p-1 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                    className="p-1 text-white bg-auction-600 hover:bg-auction-700 rounded-md transition-colors"
                   >
                     <ArrowUpRight className="w-3 h-3" />
                   </button>
@@ -166,7 +166,7 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
   
   // 💻 DESKTOP VERTICAL - MAIS ESPAÇOSO
   return (
-    <div className="group bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer">
+    <div className="group bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer">
       {/* 🖼️ IMAGEM PRINCIPAL */}
       <div className="relative aspect-[4/3] bg-gray-100">
         <PlaceholderImage 
@@ -178,13 +178,13 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
         {/* 🔥 BADGES SOBRE A IMAGEM - CANTO SUPERIOR */}
         <div className="absolute top-3 left-3 flex gap-2">
           {discount && discount > 0 && (
-            <span className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-md">
-              -{discount}% OFF
+            <span className="bg-success-500 text-white font-bold rounded-lg shadow-md inline-flex items-center justify-center" style={{ fontSize: '10px', padding: '4px 6px', lineHeight: '1' }}>
+              -{discount}%
             </span>
           )}
           
           {isNew && (
-            <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
+            <span className="bg-gradient-to-r from-error-500 to-error-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
               NOVO
             </span>
           )}
@@ -242,12 +242,12 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex gap-2">
             {stage && (
-              <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-md">
+              <span className="text-auction-700 text-xs font-medium px-2.5 py-1 rounded-md" style={{ backgroundColor: '#f0faff' }}>
                 {stage}
               </span>
             )}
             {origin && (
-              <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-md">
+              <span className="text-auction-700 text-xs font-medium px-2.5 py-1 rounded-md" style={{ backgroundColor: '#f0faff' }}>
                 {origin}
               </span>
             )}
@@ -267,7 +267,7 @@ export const RevolutionaryCard: React.FC<RevolutionaryCardProps> = ({
                   e.stopPropagation();
                   onLink();
                 }}
-                className="p-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                className="p-2 text-white bg-auction-600 hover:bg-auction-700 rounded-lg transition-colors"
               >
                 <ArrowUpRight className="w-4 h-4" />
               </button>

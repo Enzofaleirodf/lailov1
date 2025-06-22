@@ -116,29 +116,71 @@ export const FilterTags: React.FC<FilterTagsProps> = ({
       });
     }
 
-    // ✅ ÁREA (só mostrar se não for estado inicial [0,0])
-    const hasAreaFilter = imoveisFilters.area[0] !== 0 || imoveisFilters.area[1] !== 0;
-    if (hasAreaFilter) {
+    // ✅ ÁREA M² (só mostrar se há valores válidos)
+    const hasAreaM2Filter = imoveisFilters.areaM2 &&
+      imoveisFilters.areaM2.length > 0 &&
+      imoveisFilters.areaM2[0] !== undefined &&
+      imoveisFilters.areaM2[1] !== undefined &&
+      (imoveisFilters.areaM2[0] > 0 || imoveisFilters.areaM2[1] > 0);
+    if (hasAreaM2Filter) {
       tags.push({
-        key: 'area',
-        label: 'Área',
-        value: `${imoveisFilters.area[0]}m² - ${imoveisFilters.area[1]}m²`,
-        onRemove: () => onRemoveFilter('area')
+        key: 'areaM2',
+        label: 'Área (m²)',
+        value: `${imoveisFilters.areaM2[0] || 0}m² - ${imoveisFilters.areaM2[1] || 0}m²`,
+        onRemove: () => onRemoveFilter('areaM2')
       });
     }
 
-    // ✅ VALOR (só mostrar se não for estado inicial [0,0])
-    const hasValueFilter = imoveisFilters.valor[0] !== 0 || imoveisFilters.valor[1] !== 0;
-    if (hasValueFilter) {
-      // ✅ NOVO: Mostrar "0+" para valor mínimo 0
-      const minValue = imoveisFilters.valor[0] === 0 ? "0+" : imoveisFilters.valor[0].toLocaleString();
-      const maxValue = imoveisFilters.valor[1].toLocaleString();
+    // ✅ ÁREA HECTARES (só mostrar se há valores válidos)
+    const hasAreaHectaresFilter = imoveisFilters.areaHectares &&
+      imoveisFilters.areaHectares.length > 0 &&
+      imoveisFilters.areaHectares[0] !== undefined &&
+      imoveisFilters.areaHectares[1] !== undefined &&
+      (imoveisFilters.areaHectares[0] > 0 || imoveisFilters.areaHectares[1] > 0);
+    if (hasAreaHectaresFilter) {
+      tags.push({
+        key: 'areaHectares',
+        label: 'Área (ha)',
+        value: `${imoveisFilters.areaHectares[0] || 0}ha - ${imoveisFilters.areaHectares[1] || 0}ha`,
+        onRemove: () => onRemoveFilter('areaHectares')
+      });
+    }
+
+    // ✅ VALOR AVALIAÇÃO (só mostrar se há valores válidos)
+    const hasValueAvaliacaoFilter = imoveisFilters.valorAvaliacao &&
+      imoveisFilters.valorAvaliacao.length > 0 &&
+      imoveisFilters.valorAvaliacao[0] !== undefined &&
+      imoveisFilters.valorAvaliacao[1] !== undefined &&
+      (imoveisFilters.valorAvaliacao[0] > 0 || imoveisFilters.valorAvaliacao[1] > 0);
+    if (hasValueAvaliacaoFilter) {
+      // ✅ CORREÇÃO: Verificar se valores não são undefined antes de chamar toLocaleString
+      const minValue = imoveisFilters.valorAvaliacao[0] === 0 ? "0+" : (imoveisFilters.valorAvaliacao[0] || 0).toLocaleString();
+      const maxValue = (imoveisFilters.valorAvaliacao[1] || 0).toLocaleString();
 
       tags.push({
-        key: 'valor',
-        label: 'Valor do lance inicial',
+        key: 'valorAvaliacao',
+        label: 'Valor de avaliação',
         value: `R$ ${minValue} - R$ ${maxValue}`,
-        onRemove: () => onRemoveFilter('valor')
+        onRemove: () => onRemoveFilter('valorAvaliacao')
+      });
+    }
+
+    // ✅ VALOR DESCONTO (só mostrar se há valores válidos)
+    const hasValueDescontoFilter = imoveisFilters.valorDesconto &&
+      imoveisFilters.valorDesconto.length > 0 &&
+      imoveisFilters.valorDesconto[0] !== undefined &&
+      imoveisFilters.valorDesconto[1] !== undefined &&
+      (imoveisFilters.valorDesconto[0] > 0 || imoveisFilters.valorDesconto[1] > 0);
+    if (hasValueDescontoFilter) {
+      // ✅ CORREÇÃO: Verificar se valores não são undefined antes de chamar toLocaleString
+      const minValue = imoveisFilters.valorDesconto[0] === 0 ? "0+" : (imoveisFilters.valorDesconto[0] || 0).toLocaleString();
+      const maxValue = (imoveisFilters.valorDesconto[1] || 0).toLocaleString();
+
+      tags.push({
+        key: 'valorDesconto',
+        label: 'Valor com desconto',
+        value: `R$ ${minValue} - R$ ${maxValue}`,
+        onRemove: () => onRemoveFilter('valorDesconto')
       });
     }
 
@@ -248,25 +290,48 @@ export const FilterTags: React.FC<FilterTagsProps> = ({
       });
     }
 
-    // ✅ ANO (só mostrar se não for estado inicial [0,0])
-    const hasYearFilter = veiculosFilters.ano[0] !== 0 || veiculosFilters.ano[1] !== 0;
+    // ✅ ANO (só mostrar se há valores válidos)
+    const hasYearFilter = veiculosFilters.ano &&
+      veiculosFilters.ano.length > 0 &&
+      veiculosFilters.ano[0] !== undefined &&
+      veiculosFilters.ano[1] !== undefined &&
+      (veiculosFilters.ano[0] > 0 || veiculosFilters.ano[1] > 0);
     if (hasYearFilter) {
       tags.push({
         key: 'ano',
         label: 'Ano',
-        value: `${veiculosFilters.ano[0]} - ${veiculosFilters.ano[1]}`,
+        value: `${veiculosFilters.ano[0] || 0} - ${veiculosFilters.ano[1] || 0}`,
         onRemove: () => onRemoveFilter('ano')
       });
     }
 
-    // ✅ PREÇO (só mostrar se não for estado inicial [0,0])
-    const hasPriceFilter = veiculosFilters.preco[0] !== 0 || veiculosFilters.preco[1] !== 0;
-    if (hasPriceFilter) {
+    // ✅ VALOR AVALIAÇÃO (só mostrar se há valores válidos)
+    const hasValueAvaliacaoVeiculosFilter = veiculosFilters.valorAvaliacao &&
+      veiculosFilters.valorAvaliacao.length > 0 &&
+      veiculosFilters.valorAvaliacao[0] !== undefined &&
+      veiculosFilters.valorAvaliacao[1] !== undefined &&
+      (veiculosFilters.valorAvaliacao[0] > 0 || veiculosFilters.valorAvaliacao[1] > 0);
+    if (hasValueAvaliacaoVeiculosFilter) {
       tags.push({
-        key: 'preco',
-        label: 'Valor do lance inicial',
-        value: `R$ ${veiculosFilters.preco[0].toLocaleString()} - R$ ${veiculosFilters.preco[1].toLocaleString()}`,
-        onRemove: () => onRemoveFilter('preco')
+        key: 'valorAvaliacao',
+        label: 'Valor de avaliação',
+        value: `R$ ${(veiculosFilters.valorAvaliacao[0] || 0).toLocaleString()} - R$ ${(veiculosFilters.valorAvaliacao[1] || 0).toLocaleString()}`,
+        onRemove: () => onRemoveFilter('valorAvaliacao')
+      });
+    }
+
+    // ✅ VALOR DESCONTO (só mostrar se há valores válidos)
+    const hasValueDescontoVeiculosFilter = veiculosFilters.valorDesconto &&
+      veiculosFilters.valorDesconto.length > 0 &&
+      veiculosFilters.valorDesconto[0] !== undefined &&
+      veiculosFilters.valorDesconto[1] !== undefined &&
+      (veiculosFilters.valorDesconto[0] > 0 || veiculosFilters.valorDesconto[1] > 0);
+    if (hasValueDescontoVeiculosFilter) {
+      tags.push({
+        key: 'valorDesconto',
+        label: 'Valor com desconto',
+        value: `R$ ${(veiculosFilters.valorDesconto[0] || 0).toLocaleString()} - R$ ${(veiculosFilters.valorDesconto[1] || 0).toLocaleString()}`,
+        onRemove: () => onRemoveFilter('valorDesconto')
       });
     }
   }
@@ -286,13 +351,13 @@ export const FilterTags: React.FC<FilterTagsProps> = ({
         {tags.map((tag) => (
           <div
             key={tag.key}
-            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md border border-blue-200"
+            className="inline-flex items-center gap-1 px-2 py-1 bg-auction-50 text-auction-700 text-xs rounded-md border border-auction-200"
           >
             <span className="font-medium">{tag.label}:</span>
             <span>{tag.value}</span>
             <button
               onClick={tag.onRemove}
-              className="ml-1 p-0.5 hover:bg-blue-100 rounded-sm transition-colors"
+              className="ml-1 p-0.5 hover:bg-auction-100 rounded-sm transition-colors"
               aria-label={`Remover filtro ${tag.label}`}
             >
               <X size={12} />

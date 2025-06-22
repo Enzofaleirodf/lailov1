@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Vehicle Brands</title>
+</head>
+<body>
+    <h1>Testing Vehicle Brands Query</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const supabaseUrl = 'https://lsuyvkybrmddtsanvmvw.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdXl2a3licm1kZHRzYW52bXZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzI5NzQsImV4cCI6MjA1MDU0ODk3NH0.Ej_qJOQGGJJOKJOQGGJJOKJOQGGJJOKJOQGGJJOKJOQ';
+        
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        
+        async function testBrands() {
+            console.log('🚗 Testing vehicle brands query...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('lots_vehicle')
+                    .select('brand')
+                    .not('brand', 'is', null)
+                    .neq('brand', '')
+                    .order('brand');
+                
+                console.log('Raw data:', data);
+                console.log('Error:', error);
+                
+                if (error) {
+                    document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                    return;
+                }
+                
+                const allBrands = data.map(item => item.brand).filter(Boolean);
+                const uniqueBrands = [...new Set(allBrands)];
+                
+                console.log('All brands:', allBrands.length);
+                console.log('Unique brands:', uniqueBrands.length);
+                console.log('First 10:', uniqueBrands.slice(0, 10));
+                console.log('Last 10:', uniqueBrands.slice(-10));
+                
+                const brandsAfterC = uniqueBrands.filter(brand => brand.toLowerCase().charAt(0) > 'c');
+                console.log('Brands after C:', brandsAfterC.length);
+                
+                document.getElementById('results').innerHTML = `
+                    <p><strong>Total records:</strong> ${data.length}</p>
+                    <p><strong>Unique brands:</strong> ${uniqueBrands.length}</p>
+                    <p><strong>Brands after C:</strong> ${brandsAfterC.length}</p>
+                    <p><strong>First 10:</strong> ${uniqueBrands.slice(0, 10).join(', ')}</p>
+                    <p><strong>Last 10:</strong> ${uniqueBrands.slice(-10).join(', ')}</p>
+                    <details>
+                        <summary>All brands</summary>
+                        <pre>${uniqueBrands.join('\n')}</pre>
+                    </details>
+                `;
+                
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                document.getElementById('results').innerHTML = `<p style="color: red;">Unexpected error: ${err.message}</p>`;
+            }
+        }
+        
+        testBrands();
+    </script>
+</body>
+</html>

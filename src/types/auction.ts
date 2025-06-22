@@ -11,6 +11,7 @@ export interface Auction {
   
   // Vehicle fields
   vehicle_type?: string;
+  vehicle_category?: string; // ✅ ADIÇÃO: Campo vehicle_category para subrotas
   brand?: string;
   model?: string;
   color?: string;
@@ -57,8 +58,14 @@ export interface Filters {
 export interface ImoveisFilters {
   estado: string;
   cidade: string;
-  area: [number, number];
-  valor: [number, number];
+  // ✅ NOVO: Filtros de área com switch
+  areaType: 'm2' | 'hectares'; // Switch entre m² e hectares
+  areaM2: [number | undefined, number | undefined]; // Range para m² (undefined = campo vazio)
+  areaHectares: [number | undefined, number | undefined]; // Range para hectares (undefined = campo vazio)
+  // ✅ NOVO: Filtros de valor com switch
+  valorType: 'avaliacao' | 'desconto'; // Switch entre avaliação e com desconto
+  valorAvaliacao: [number | undefined, number | undefined]; // Range para valor de avaliação (undefined = campo vazio)
+  valorDesconto: [number | undefined, number | undefined]; // Range para valor com desconto (undefined = campo vazio)
   formato: string;
   origem: string[];
   etapa: string[];
@@ -70,8 +77,11 @@ export interface VeiculosFilters {
   marca: string;
   modelo: string;
   cor: string;
-  ano: [number, number];
-  preco: [number, number];
+  ano: [number | undefined, number | undefined]; // Range para ano (undefined = campo vazio)
+  // ✅ NOVO: Filtros de valor com switch (mesmo para veículos)
+  valorType: 'avaliacao' | 'desconto'; // Switch entre avaliação e com desconto
+  valorAvaliacao: [number | undefined, number | undefined]; // Range para valor de avaliação (undefined = campo vazio)
+  valorDesconto: [number | undefined, number | undefined]; // Range para valor com desconto (undefined = campo vazio)
   formato: string;
   origem: string[];
   etapa: string[];
@@ -113,7 +123,7 @@ export interface RangeValue {
 // Tipos para handlers de eventos
 export type FilterChangeHandler<T = string> = (value: T) => void;
 export type MultiFilterChangeHandler = (values: string[]) => void;
-export type RangeChangeHandler = (range: [number, number]) => void;
+export type RangeChangeHandler = (range: [number | undefined, number | undefined]) => void;
 export type PageChangeHandler = (page: number) => void;
 
 // Tipos para props de componentes
@@ -123,7 +133,7 @@ export interface BaseComponentProps {
 }
 
 export interface FilterComponentProps extends BaseComponentProps {
-  value: string | string[] | [number, number];
+  value: string | string[] | [number | undefined, number | undefined];
   onValueChange: FilterChangeHandler | MultiFilterChangeHandler | RangeChangeHandler;
 }
 

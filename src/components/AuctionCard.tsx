@@ -1,19 +1,33 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { Auction, ViewMode } from '../types/auction';
 import { AuctionCardBase } from './cards/AuctionCardBase';
 import { DateUtils } from '../utils/dateUtils';
 import { useFavorites } from '../hooks/useFavorites';
 import { useAuth } from '../contexts/AuthContext';
+import { useProximityPrefetch, useImagePrefetch } from '../hooks/useSmartPrefetch';
 
 interface AuctionCardProps {
   auction: Auction;
   viewMode: ViewMode;
+  priority?: boolean; // 🚀 PRIORIDADE para imagens críticas
 }
 
-// 🚀 OTIMIZAÇÃO: React.memo para evitar re-renderizações desnecessárias
-export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, viewMode }) => {
+// 🚀 OTIMIZAÇÃO: React.memo com comparação customizada para máxima performance
+export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, viewMode, priority = false }) => {
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
+
+  // 🚀 SMART PREFETCH: Prefetch inteligente baseado em hover
+  const { attachListeners } = useProximityPrefetch(
+    auction.href || '#',
+    !!auction.href // Só ativar se tiver link
+  );
+
+  // 🚀 IMAGE PREFETCH: Prefetch de imagens relacionadas
+  useImagePrefetch(
+    auction.image ? [auction.image] : [],
+    !priority // Só fazer prefetch se não for prioridade (já carregada)
+  );
   
   // 🛡️ CORREÇÃO: Verificação defensiva para evitar erro #130
   if (!auction || typeof auction !== 'object') {
@@ -21,7 +35,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
   }
 
   // Verificar propriedades essenciais
-  if (!auction._id || !auction.type || !auction.image) {
+  if (!auction._id || !auction.type) {
     return null;
   }
 
@@ -220,26 +234,60 @@ export const AuctionCard: React.FC<AuctionCardProps> = React.memo(({ auction, vi
     formatCurrency
   ]);
 
+  // 🚨 DEBUG: Verificar dados da imagem
+  const imageUrl = auction.image || '';
+  const hasValidImage = imageUrl && imageUrl.trim() !== '' && imageUrl !== 'undefined' && imageUrl !== 'null';
+
+  console.log('🖼️ AuctionCard Image Debug:', {
+    id: auction._id,
+    originalImage: auction.image,
+    imageUrl,
+    hasValidImage,
+    imageType: typeof auction.image
+  });
+
+  // 🚀 REF CALLBACK: Anexar listeners de prefetch
+  const cardRef = useCallback((element: HTMLElement | null) => {
+    if (element && auction.href) {
+      const cleanup = attachListeners(element);
+      return cleanup;
+    }
+  }, [attachListeners, auction.href]);
+
   return (
-    <AuctionCardBase
-      viewMode={viewMode}
-      price={formatCurrency(auction.initial_bid_value || 0)}
-      imageUrl={auction.image || ''}
-      isFavorited={isFavorited}
-      onToggleFavorite={handleToggleFavorite}
-      onLink={handleLink}
-      isNew={isNew}
-      date={formatEndDateTime(auction.end_date)}
-      tags={cardData.tags}
-      discount={cardData.discountText}
-      title={cardData.title}
-      subtitle={cardData.subtitle}
-      metadata={cardData.metadata}
-      titleParts={cardData.titleParts}
-      subtitleParts={cardData.subtitleParts}
-      titleTruncate={cardData.titleTruncate}
-      subtitleTruncate={cardData.subtitleTruncate}
-    />
+    <div ref={cardRef}>
+      <AuctionCardBase
+        viewMode={viewMode}
+        price={formatCurrency(auction.initial_bid_value || 0)}
+        imageUrl={hasValidImage ? imageUrl : ''}
+        isFavorited={isFavorited}
+        onToggleFavorite={handleToggleFavorite}
+        onLink={handleLink}
+        isNew={isNew}
+        date={formatEndDateTime(auction.end_date)}
+        tags={cardData.tags}
+        discount={cardData.discountText}
+        title={cardData.title}
+        subtitle={cardData.subtitle}
+        metadata={cardData.metadata}
+        titleParts={cardData.titleParts}
+        subtitleParts={cardData.subtitleParts}
+        titleTruncate={cardData.titleTruncate}
+        subtitleTruncate={cardData.subtitleTruncate}
+        priority={priority} // 🚀 PRIORIDADE para imagens críticas
+      />
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // 🚀 OTIMIZAÇÃO: Comparação customizada para React.memo
+  // Comparar apenas propriedades que afetam a renderização
+  return (
+    prevProps.auction._id === nextProps.auction._id &&
+    prevProps.viewMode === nextProps.viewMode &&
+    prevProps.priority === nextProps.priority &&
+    prevProps.auction.initial_bid_value === nextProps.auction.initial_bid_value &&
+    prevProps.auction.appraised_value === nextProps.auction.appraised_value &&
+    prevProps.auction.image === nextProps.auction.image
   );
 });
 

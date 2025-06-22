@@ -107,26 +107,27 @@ export const UI_CONFIG = {
 export const COLOR_CONFIG = {
   // Cores principais
   PRIMARY: {
-    50: '#eff6ff',
-    100: '#dbeafe',
-    500: '#3b82f6',
-    600: '#2563eb',
-    700: '#1d4ed8',
-    900: '#1e3a8a'
+    50: '#f0f9ff',
+    100: '#e0f2fe',
+    500: '#0088D9', // Cor da marca
+    600: '#0284c7',
+    700: '#0369a1',
+    900: '#0c4a6e'
   },
-  
+
   // Estados
-  SUCCESS: '#10b981',
+  SUCCESS: '#0A850E', // Badge de desconto
   WARNING: '#f59e0b',
-  ERROR: '#ef4444',
-  INFO: '#3b82f6',
-  
+  ERROR: '#E22851', // Badge novo
+  INFO: '#0088D9', // Cor da marca
+  BACKGROUND_GRAY: '#F1F1F0', // Background cinza
+
   // Gradientes
   GRADIENTS: {
-    NEW_BADGE: 'from-yellow-400 to-orange-400',
-    DISCOUNT_BADGE: 'from-green-500 to-green-600',
-    PRIMARY_BUTTON: 'from-blue-600 to-indigo-600',
-    LOGO: 'from-blue-500 to-indigo-600'
+    NEW_BADGE: 'from-error-500 to-error-600', // Vermelho #E22851
+    DISCOUNT_BADGE: 'from-success-500 to-success-600', // Verde #0A850E
+    PRIMARY_BUTTON: 'from-auction-500 to-auction-600', // Azul da marca #0088D9
+    LOGO: 'from-auction-500 to-auction-600' // Azul da marca #0088D9
   }
 } as const;
 

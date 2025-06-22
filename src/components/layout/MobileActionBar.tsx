@@ -44,7 +44,7 @@ export const MobileActionBar: React.FC<MobileActionBarProps> = ({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 autoFocus
               />
             </div>
@@ -68,37 +68,37 @@ export const MobileActionBar: React.FC<MobileActionBarProps> = ({
               >
                 <Search className="w-4 h-4" />
               </button>
-              
+
               <button
                 onClick={onSortClick}
                 className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <ArrowUpDown className="w-4 h-4" />
               </button>
-              
+
               <button
                 onClick={onFiltersClick}
                 className={`relative p-2.5 rounded-xl transition-colors ${
                   hasActiveFilters
-                    ? 'text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100'
+                    ? 'text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0'
                 }`}
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 {hasActiveFilters && activeFiltersCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
                     {activeFiltersCount > 9 ? '9+' : activeFiltersCount}
                   </span>
                 )}
               </button>
             </div>
-            
+
             <div className="bg-gray-100 rounded-xl p-1">
               <button
                 onClick={() => onViewModeChange('horizontal')}
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'horizontal'
-                    ? 'bg-white text-blue-600 shadow-sm'
+                    ? 'bg-white text-auction-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -108,7 +108,7 @@ export const MobileActionBar: React.FC<MobileActionBarProps> = ({
                 onClick={() => onViewModeChange('vertical')}
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'vertical'
-                    ? 'bg-white text-blue-600 shadow-sm'
+                    ? 'bg-white text-auction-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >

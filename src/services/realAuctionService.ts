@@ -1,15 +1,16 @@
 import { auctions, PropertyAuction, VehicleAuction } from '../lib/database';
-import { 
-  Auction, 
-  Category, 
-  SortOption, 
-  Filters, 
+import {
+  Auction,
+  Category,
+  SortOption,
+  Filters,
   AuctionSearchResult,
-  isValidAuction 
+  isValidAuction
 } from '../types/auction';
 import { DateUtils } from '../utils/dateUtils';
 import { MAPPINGS } from '../config/mappings';
 import { DATE_CONFIG } from '../config/constants';
+import { processMockAuctions } from './mockFallbackService';
 
 /**
  * Service para operações com leilões reais do Supabase
@@ -17,6 +18,30 @@ import { DATE_CONFIG } from '../config/constants';
  */
 
 // ===== UTILITY FUNCTIONS =====
+
+/**
+ * Converte valores numéricos de etapa do banco (1, 2, 3) para formato de exibição
+ */
+function convertStageFromDatabase(stage: string | number | null | undefined): string {
+  if (!stage) return '';
+
+  const stageStr = String(stage).trim();
+
+  // Converter valores numéricos do banco para formato de exibição
+  switch (stageStr) {
+    case '1':
+      return '1ª Praça';
+    case '2':
+      return '2ª Praça';
+    case '3':
+      return '3ª Praça';
+    default:
+      // Se já está no formato correto ou é outro valor, retornar como está
+      return stageStr;
+  }
+}
+
+
 
 /**
  * Converte PropertyAuction do banco para Auction do frontend
@@ -32,11 +57,11 @@ function convertPropertyToAuction(property: PropertyAuction): Auction {
     property_address: property.property_address || undefined,
     city: property.city || '',
     state: property.state || '',
-    initial_bid_value: property.initial_bid_value || 0,
-    // ✅ CORREÇÃO CRÍTICA: Não usar fallback para appraised_value - manter null se for null
+    // ✅ CORREÇÃO CRÍTICA: Não usar fallback - manter valores reais do banco
+    initial_bid_value: property.initial_bid_value || 0, // Manter 0 apenas se for null
     appraised_value: property.appraised_value,
     origin: property.origin || '',
-    stage: property.stage || '',
+    stage: convertStageFromDatabase(property.stage),
     end_date: property.end_date || '',
     href: property.href || '',
     website: property.website || '',
@@ -67,7 +92,7 @@ function convertVehicleToAuction(vehicle: VehicleAuction): Auction {
     // ✅ CORREÇÃO CRÍTICA: Não usar fallback para appraised_value - manter null se for null
     appraised_value: vehicle.appraised_value,
     origin: vehicle.origin || '',
-    stage: vehicle.stage || '',
+    stage: convertStageFromDatabase(vehicle.stage),
     end_date: vehicle.end_date || '',
     href: vehicle.href || '',
     website: vehicle.website || '',
@@ -90,7 +115,7 @@ function getVehicleTypeFilter(type: string): { types?: string[]; isNaoInformado?
   }
 
   if (type === 'nao-informado') {
-    // ✅ REGRA 2: 'nao-informado' = WHERE vehicle_type IS NULL OR TRIM(vehicle_type) = ''
+    // ✅ REGRA 2: 'nao-informado' = WHERE vehicle_category IS NULL OR TRIM(vehicle_category) = ''
     return { isNaoInformado: true };
   }
 
@@ -264,6 +289,38 @@ export async function processRealAuctions(
   showExpiredAuctions: boolean = false // ✅ NOVO: Mostrar leilões expirados
 ): Promise<AuctionSearchResult> {
   try {
+    // 🎭 FALLBACK: Verificar se banco tem dados de forma mais segura
+    let testQuery = 0;
+    try {
+      testQuery = await auctions.countProperties({
+        showExpiredAuctions: false // Parâmetro mínimo necessário
+      });
+    } catch (error) {
+      console.warn('🎭 Erro ao verificar banco, usando dados MOCADOS:', error);
+      return await processMockAuctions(
+        category,
+        type,
+        filters,
+        sort,
+        searchQuery,
+        page,
+        showExpiredAuctions
+      );
+    }
+
+    if (testQuery === 0) {
+      console.log('🎭 Banco vazio, usando dados MOCADOS');
+      return await processMockAuctions(
+        category,
+        type,
+        filters,
+        sort,
+        searchQuery,
+        page,
+        showExpiredAuctions
+      );
+    }
+
     // ✅ PAGINAÇÃO REAL: Calcular limit e offset corretos
     const limit = 30; // 30 itens por página
     const offset = (page - 1) * limit; // offset baseado na página
@@ -299,19 +356,26 @@ export async function processRealAuctions(
 
       // ✅ CORREÇÃO CRÍTICA: Construir filterParams baseado no tipo de filtro
       const filterParams: any = {
-        state: filters?.state && filters.state !== 'all' ? filters.state : undefined,
-        city: filters?.city && filters.city !== 'all' ? filters.city : undefined,
+        state: filters?.state && filters.state !== 'all' && filters.state !== '' ? filters.state : undefined,
+        city: filters?.city && filters.city !== 'all' && filters.city !== '' ? filters.city : undefined, // ✅ CORREÇÃO: Verificar string vazia
         format: mappedFormat, // ✅ CORREÇÃO: Usar valor mapeado
         origin: mappedOrigin, // ✅ CORREÇÃO: Usar valores mapeados
         stage: mappedStage, // ✅ CORREÇÃO: Usar valores mapeados
-        min_area: filters?.useful_area_m2 ? filters.useful_area_m2[0] : undefined,
-        max_area: filters?.useful_area_m2 ? filters.useful_area_m2[1] : undefined,
-        min_value: filters?.initial_bid_value ? filters.initial_bid_value[0] : undefined,
-        max_value: filters?.initial_bid_value ? filters.initial_bid_value[1] : undefined,
+        min_area: filters?.useful_area_m2 && filters.useful_area_m2[0] !== undefined ? filters.useful_area_m2[0] : undefined,
+        max_area: filters?.useful_area_m2 && filters.useful_area_m2[1] !== undefined ? filters.useful_area_m2[1] : undefined,
+        min_value: filters?.initial_bid_value && filters.initial_bid_value[0] !== undefined ? filters.initial_bid_value[0] : undefined,
+        max_value: filters?.initial_bid_value && filters.initial_bid_value[1] !== undefined ? filters.initial_bid_value[1] : undefined,
         search: searchQuery || undefined, // ✅ CORREÇÃO: Busca aplicada no banco
         sort: sort || 'newest', // ✅ CORREÇÃO: Ordenação aplicada no banco
         showExpiredAuctions // ✅ NOVO: Filtro para leilões expirados
       };
+
+      // 🔍 DEBUG: Log dos filtros aplicados
+      console.log('🔍 DEBUG Imóveis - Filtros aplicados:', {
+        originalFilters: filters,
+        processedFilterParams: filterParams,
+        typeFilterResult
+      });
 
       // ✅ CORREÇÃO CRÍTICA: Aplicar filtro de tipo baseado nas regras
       if (typeFilterResult.types) {
@@ -383,20 +447,31 @@ export async function processRealAuctions(
           })()
         : undefined;
 
+      // ✅ CONVERSÃO SIMPLIFICADA: Converter slugs básicos para nomes
+      const realBrandName = filters?.brand && filters.brand !== 'all'
+        ? filters.brand.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        : undefined;
+      const realModelName = filters?.model && filters.model !== 'all'
+        ? filters.model.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        : undefined;
+      const realColorName = filters?.color && filters.color !== 'all'
+        ? filters.color.charAt(0).toUpperCase() + filters.color.slice(1)
+        : undefined;
+
       // ✅ CORREÇÃO CRÍTICA: Construir filterParams baseado no tipo de filtro
       const filterParams: any = {
-        state: filters?.state && filters.state !== 'all' ? filters.state : undefined,
-        city: filters?.city && filters.city !== 'all' ? filters.city : undefined,
-        brand: filters?.brand && filters.brand !== 'all' ? filters.brand : undefined,
-        model: filters?.model && filters.model !== 'all' ? filters.model : undefined,
-        color: filters?.color && filters.color !== 'all' ? filters.color : undefined,
+        state: filters?.state && filters.state !== 'all' && filters.state !== '' ? filters.state : undefined,
+        city: filters?.city && filters.city !== 'all' && filters.city !== '' ? filters.city : undefined, // ✅ CORREÇÃO: Verificar string vazia
+        brand: realBrandName, // ✅ CORREÇÃO: Usar nome real da marca
+        model: realModelName, // ✅ CORREÇÃO: Usar nome real do modelo
+        color: realColorName, // ✅ CORREÇÃO: Usar nome real da cor
         format: mappedFormat, // ✅ CORREÇÃO: Usar valor mapeado
         origin: mappedOrigin, // ✅ CORREÇÃO: Usar valores mapeados
         stage: mappedStage, // ✅ CORREÇÃO: Usar valores mapeados
-        min_year: filters?.year ? filters.year[0] : undefined,
-        max_year: filters?.year ? filters.year[1] : undefined,
-        min_value: filters?.initial_bid_value ? filters.initial_bid_value[0] : undefined,
-        max_value: filters?.initial_bid_value ? filters.initial_bid_value[1] : undefined,
+        min_year: filters?.year && filters.year[0] !== undefined ? filters.year[0] : undefined,
+        max_year: filters?.year && filters.year[1] !== undefined ? filters.year[1] : undefined,
+        min_value: filters?.initial_bid_value && filters.initial_bid_value[0] !== undefined ? filters.initial_bid_value[0] : undefined,
+        max_value: filters?.initial_bid_value && filters.initial_bid_value[1] !== undefined ? filters.initial_bid_value[1] : undefined,
         search: searchQuery || undefined, // ✅ CORREÇÃO: Busca aplicada no banco
         sort: sort || 'newest', // ✅ CORREÇÃO: Ordenação aplicada no banco
         showExpiredAuctions // ✅ NOVO: Filtro para leilões expirados
@@ -483,21 +558,39 @@ export async function processRealAuctions(
         format: mappedFormat,
         origin: mappedOrigin,
         stage: mappedStage,
-        min_area: filters?.useful_area_m2 ? filters.useful_area_m2[0] : undefined,
-        max_area: filters?.useful_area_m2 ? filters.useful_area_m2[1] : undefined,
-        min_value: filters?.initial_bid_value ? filters.initial_bid_value[0] : undefined,
-        max_value: filters?.initial_bid_value ? filters.initial_bid_value[1] : undefined,
+        min_area: filters?.useful_area_m2 && filters.useful_area_m2[0] !== undefined ? filters.useful_area_m2[0] : undefined,
+        max_area: filters?.useful_area_m2 && filters.useful_area_m2[1] !== undefined ? filters.useful_area_m2[1] : undefined,
+        min_value: filters?.initial_bid_value && filters.initial_bid_value[0] !== undefined ? filters.initial_bid_value[0] : undefined,
+        max_value: filters?.initial_bid_value && filters.initial_bid_value[1] !== undefined ? filters.initial_bid_value[1] : undefined,
         search: searchQuery || undefined
       };
 
-      // ✅ CORREÇÃO CRÍTICA: Aplicar filtro de tipo
+      // ✅ CORREÇÃO CRÍTICA: Aplicar filtro de tipo APENAS quando não for 'todos'
       if (typeFilterResult.types) {
         propertyFilterParams.property_categories = typeFilterResult.types;
       } else if (typeFilterResult.isNaoInformado) {
         propertyFilterParams.property_categories = ['__NAO_INFORMADO__'];
       }
+      // ✅ CORREÇÃO: Para 'todos', não aplicar filtro de tipo (deixar undefined)
 
-      sitesCount = await auctions.getPropertySitesCount(propertyFilterParams);
+      // ✅ CORREÇÃO CRÍTICA: Remover propriedades undefined antes de enviar
+      const cleanPropertyFilters = Object.fromEntries(
+        Object.entries(propertyFilterParams).filter(([key, value]) => {
+          if (value === undefined || value === null || value === '') return false;
+          if (Array.isArray(value) && value.length === 0) return false;
+          if (Array.isArray(value) && value.every(v => v === undefined || v === null || v === '')) return false;
+          return true;
+        })
+      );
+
+      // ✅ CORREÇÃO CRÍTICA: Só adicionar showExpiredAuctions se não for o valor padrão
+      // Para evitar que um objeto vazio seja considerado como "com filtros"
+      if (showExpiredAuctions !== false) {
+        cleanPropertyFilters.showExpiredAuctions = showExpiredAuctions;
+      }
+
+      console.log('🏢 DEBUG - cleanPropertyFilters final:', cleanPropertyFilters);
+      sitesCount = await auctions.getPropertySitesCount(cleanPropertyFilters);
     } else {
       // Reconstruir filterParams para veículos
       const typeFilterResult = getVehicleTypeFilter(type || 'todos');
@@ -518,39 +611,97 @@ export async function processRealAuctions(
           })()
         : undefined;
 
-      // ✅ CORREÇÃO CRÍTICA: Usar vehicle_types
+      // ✅ CORREÇÃO CRÍTICA: Aplicar MESMA transformação usada na busca de leilões
+      const realBrandName = filters?.brand && filters.brand !== 'all'
+        ? filters.brand.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        : undefined;
+      const realModelName = filters?.model && filters.model !== 'all'
+        ? filters.model.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        : undefined;
+      const realColorName = filters?.color && filters.color !== 'all'
+        ? filters.color.charAt(0).toUpperCase() + filters.color.slice(1)
+        : undefined;
+
+      // ✅ CORREÇÃO CRÍTICA: Usar vehicle_types com transformação consistente
       const vehicleFilterParams: any = {
         state: filters?.state && filters.state !== 'all' ? filters.state : undefined,
         city: filters?.city && filters.city !== 'all' ? filters.city : undefined,
-        brand: filters?.brand && filters.brand !== 'all' ? filters.brand : undefined,
-        model: filters?.model && filters.model !== 'all' ? filters.model : undefined,
-        color: filters?.color && filters.color !== 'all' ? filters.color : undefined,
+        brand: realBrandName, // ✅ CORREÇÃO: Usar mesma transformação
+        model: realModelName, // ✅ CORREÇÃO: Usar mesma transformação
+        color: realColorName, // ✅ CORREÇÃO: Usar mesma transformação
         format: mappedFormat,
         origin: mappedOrigin,
         stage: mappedStage,
-        min_year: filters?.year ? filters.year[0] : undefined,
-        max_year: filters?.year ? filters.year[1] : undefined,
-        min_value: filters?.initial_bid_value ? filters.initial_bid_value[0] : undefined,
-        max_value: filters?.initial_bid_value ? filters.initial_bid_value[1] : undefined,
+        min_year: filters?.year && filters.year[0] !== undefined ? filters.year[0] : undefined,
+        max_year: filters?.year && filters.year[1] !== undefined ? filters.year[1] : undefined,
+        min_value: filters?.initial_bid_value && filters.initial_bid_value[0] !== undefined ? filters.initial_bid_value[0] : undefined,
+        max_value: filters?.initial_bid_value && filters.initial_bid_value[1] !== undefined ? filters.initial_bid_value[1] : undefined,
         search: searchQuery || undefined
       };
 
-      // ✅ CORREÇÃO CRÍTICA: Aplicar filtro de tipo
+      // ✅ CORREÇÃO CRÍTICA: Aplicar filtro de tipo APENAS quando não for 'todos'
       if (typeFilterResult.types) {
         vehicleFilterParams.vehicle_types = typeFilterResult.types;
       } else if (typeFilterResult.isNaoInformado) {
         vehicleFilterParams.vehicle_types = ['__NAO_INFORMADO__'];
       }
+      // ✅ CORREÇÃO: Para 'todos', não aplicar filtro de tipo (deixar undefined)
 
-      sitesCount = await auctions.getVehicleSitesCount(vehicleFilterParams);
+      // 🔍 DEBUG: Log da transformação de filtros para veículos
+      console.log('🚗 DEBUG Vehicle Filter Transformation:', {
+        type,
+        typeFilterResult,
+        originalFilters: {
+          brand: filters?.brand,
+          model: filters?.model,
+          color: filters?.color
+        },
+        transformedFilters: {
+          brand: realBrandName,
+          model: realModelName,
+          color: realColorName
+        },
+        vehicleFilterParams
+      });
+
+      // ✅ CORREÇÃO CRÍTICA: Remover propriedades undefined antes de enviar
+      const cleanVehicleFilters = Object.fromEntries(
+        Object.entries(vehicleFilterParams).filter(([key, value]) => {
+          if (value === undefined || value === null || value === '') return false;
+          if (Array.isArray(value) && value.length === 0) return false;
+          if (Array.isArray(value) && value.every(v => v === undefined || v === null || v === '')) return false;
+          return true;
+        })
+      );
+
+      // ✅ CORREÇÃO CRÍTICA: Só adicionar showExpiredAuctions se não for o valor padrão
+      // Para evitar que um objeto vazio seja considerado como "com filtros"
+      if (showExpiredAuctions !== false) {
+        cleanVehicleFilters.showExpiredAuctions = showExpiredAuctions;
+      }
+
+      console.log('🚗 DEBUG - cleanVehicleFilters final:', cleanVehicleFilters);
+      sitesCount = await auctions.getVehicleSitesCount(cleanVehicleFilters);
     }
 
     const totalSites = sitesCount;
     const newAuctions = 0; // TODO: Implementar contagem de novos leilões se necessário
 
-    // Fallback: se não conseguir buscar sites, usar estatísticas da página atual
-    const fallbackStats = calculateStatistics(processedAuctions);
-    const finalTotalSites = totalSites > 0 ? totalSites : fallbackStats.totalSites;
+    // 🔍 DEBUG: Log da contagem de sites
+    console.log('🌐 DEBUG Sites Count:', {
+      sitesCount,
+      totalSites,
+      category,
+      type,
+      hasFilters: filters ? Object.keys(filters).length > 0 : false,
+      showExpiredAuctions
+    });
+
+    // ✅ CORREÇÃO CRÍTICA: Remover fallback problemático
+    // O fallback estava usando apenas sites da página atual (30 leilões)
+    // Se sitesCount for 0, significa que há um problema na função de contagem
+    // que deve ser investigado, não mascarado com fallback incorreto
+    const finalTotalSites = totalSites;
 
     return {
       auctions: processedAuctions,

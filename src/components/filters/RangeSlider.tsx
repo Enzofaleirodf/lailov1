@@ -6,8 +6,8 @@ interface RangeSliderProps {
   min: number
   max: number
   step?: number
-  value: [number, number]
-  onValueChange: (value: [number, number]) => void
+  value: [number | undefined, number | undefined]
+  onValueChange: (value: [number | undefined, number | undefined]) => void
   prefix?: string
   suffix?: string
   className?: string
@@ -25,50 +25,71 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
   className,
   formatValue
 }) => {
-  // 🔧 CORREÇÃO: Remover memoização desnecessária - validação simples
-  const safeValue: [number, number] = (
-    Array.isArray(value) && 
-    value.length === 2 && 
-    typeof value[0] === 'number' && 
-    typeof value[1] === 'number' &&
-    !isNaN(value[0]) && 
-    !isNaN(value[1])
-  ) ? value : [min, max];
+  // ✅ CORREÇÃO: Validação simples que aceita undefined como 0
+  const safeValue: [number, number] = React.useMemo(() => {
+    if (!Array.isArray(value) || value.length !== 2) {
+      return [0, 0];
+    }
 
-  // ✅ NOVO: Formatação inteligente de valores
+    // Converter undefined para 0, mas manter 0 explícito como 0
+    const val0 = typeof value[0] === 'number' && !isNaN(value[0]) ? value[0] : 0;
+    const val1 = typeof value[1] === 'number' && !isNaN(value[1]) ? value[1] : 0;
+
+    return [val0, val1];
+  }, [value]);
+
+  // ✅ CORREÇÃO: Formatação brasileira correta
   const formatDisplayValue = (val: number): string => {
     if (formatValue) return formatValue(val);
 
-    // ✅ CORREÇÃO: Anos no Brasil não têm pontos (2024, não 2.024)
+    // ✅ CORREÇÃO: Anos SEM pontuação (2024, não 2.024)
     if (suffix === '' && val >= 1900 && val <= 2100) {
       return val.toString(); // Anos sem formatação
     }
-    return val.toLocaleString('pt-BR');
-  };
 
-  // 🔧 CORREÇÃO: Handler simples não precisa de useCallback
-  const handleInputChange = (index: 0 | 1, inputValue: string) => {
-    const numValue = parseFloat(inputValue.replace(/\D/g, '')) || 0
-    const clampedValue = Math.max(min, Math.min(max, numValue))
-    const newValue: [number, number] = [...safeValue]
-    newValue[index] = clampedValue
-
-    // Ensure min <= max
-    if (index === 0 && newValue[0] > newValue[1]) {
-      newValue[1] = newValue[0]
-    } else if (index === 1 && newValue[1] < newValue[0]) {
-      newValue[0] = newValue[1]
+    // ✅ CORREÇÃO: Área e valor COM pontos (padrão brasileiro: 1.000.000)
+    if (prefix === 'R$ ' || suffix === 'm²' || suffix === 'ha') {
+      return val.toLocaleString('pt-BR'); // Formato brasileiro com pontos
     }
 
-    onValueChange(newValue)
+    // ✅ DEFAULT: Sem formatação para outros casos
+    return val.toString();
+  };
+
+  // 🔧 ACEITAR 0: Permitir qualquer valor, incluindo 0 explícito
+  const handleInputChange = (index: 0 | 1, inputValue: string) => {
+    if (inputValue === '') {
+      // Campo vazio = undefined para indicar que não há filtro
+      const newValue: [number | undefined, number | undefined] = [
+        index === 0 ? undefined : (value?.[1] ?? undefined),
+        index === 1 ? undefined : (value?.[0] ?? undefined)
+      ];
+      onValueChange(newValue);
+      return;
+    }
+
+    // ✅ CORREÇÃO: Remover formatação brasileira (pontos) e converter vírgula para ponto
+    const cleanValue = inputValue
+      .replace(/\./g, '') // Remove pontos (separadores de milhares)
+      .replace(',', '.'); // Converte vírgula para ponto decimal
+
+    // Verificar se é um número válido
+    const numValue = parseFloat(cleanValue);
+
+    if (!isNaN(numValue) && numValue >= 0) {
+      // Aceitar qualquer valor >= 0, incluindo 0
+      const newValue: [number | undefined, number | undefined] = [
+        index === 0 ? numValue : (value?.[0] ?? undefined),
+        index === 1 ? numValue : (value?.[1] ?? undefined)
+      ];
+      onValueChange(newValue);
+    }
   };
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("", className)}>
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs text-gray-500 font-medium">Mínimo</label>
-          <div className="relative">
+        <div className="relative">
           {prefix && (
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
               {prefix}
@@ -76,9 +97,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
           )}
           <Input
             type="text"
-            value={formatDisplayValue(safeValue[0])}
+            value={value?.[0] === undefined ? "" : formatDisplayValue(safeValue[0])}
             onChange={(e) => handleInputChange(0, e.target.value)}
-            className={cn("border-gray-200 rounded-xl h-12 shadow-sm", prefix && "pl-8", suffix && "pr-8")}
+            className={cn("border-gray-200 rounded-xl h-12 shadow-sm text-xs", prefix && "pl-8", suffix && "pr-8")}
             placeholder="Mínimo"
           />
           {suffix && (
@@ -86,11 +107,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
               {suffix}
             </span>
           )}
-          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-xs text-gray-500 font-medium">Máximo</label>
-          <div className="relative">
+        <div className="relative">
           {prefix && (
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
               {prefix}
@@ -98,9 +116,9 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
           )}
           <Input
             type="text"
-            value={formatDisplayValue(safeValue[1])}
+            value={value?.[1] === undefined ? "" : formatDisplayValue(safeValue[1])}
             onChange={(e) => handleInputChange(1, e.target.value)}
-            className={cn("border-gray-200 rounded-xl h-12 shadow-sm", prefix && "pl-8", suffix && "pr-8")}
+            className={cn("border-gray-200 rounded-xl h-12 shadow-sm text-xs", prefix && "pl-8", suffix && "pr-8")}
             placeholder="Máximo"
           />
           {suffix && (
@@ -108,7 +126,6 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
               {suffix}
             </span>
           )}
-          </div>
         </div>
       </div>
     </div>

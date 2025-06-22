@@ -39,7 +39,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const sizeClasses = {
-    sm: 'h-10 text-xs',
+    sm: 'h-12 text-xs',
     md: 'h-12 text-sm',
     lg: 'h-14 text-base'
   };
@@ -122,7 +122,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
       {/* Active indicator */}
       <div
         className={cn(
-          'absolute rounded-lg bg-white shadow-md border border-blue-500',
+          'absolute rounded-lg bg-white shadow-md border border-auction-500',
           size === 'lg' ? 'top-1.5 left-1.5' : 'top-1 left-1'
         )}
         style={indicatorStyle}
@@ -139,10 +139,10 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
           aria-disabled={option.disabled || disabled}
           tabIndex={selectedValue === option.id ? 0 : -1}
           className={cn(
-            'relative z-10 flex items-center justify-center gap-2 font-medium transition-all duration-200 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white flex-1 px-2',
+            'relative z-10 flex items-center justify-center gap-1 font-medium transition-all duration-200 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auction-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white flex-1 px-2',
             sizeClasses[size],
             selectedValue === option.id
-              ? 'text-blue-800 font-medium'
+              ? 'text-auction-800 font-medium'
               : 'text-gray-500 hover:text-gray-700',
             (option.disabled || disabled) && 'cursor-not-allowed opacity-50',
             !selectedValue === option.id && !option.disabled && !disabled && 'hover:bg-gray-100/80'
@@ -156,7 +156,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
               {option.icon}
             </span>
           )}
-          <span className="whitespace-nowrap text-sm">{option.label}</span>
+          <span className="whitespace-nowrap text-xs font-semibold">{option.label}</span>
         </button>
       ))}
     </div>

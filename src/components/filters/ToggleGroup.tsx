@@ -40,7 +40,7 @@ export const ToggleGroup: React.FC<ToggleGroupProps> = ({
             className={cn(
               // Base styles - mesma altura dos botões de origem/etapa
               "px-4 py-3 text-sm font-medium border transition-all duration-200",
-              "hover:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0",
+              "hover:z-10 focus:outline-none focus:ring-2 focus:ring-auction-500 focus:ring-offset-0",
               "whitespace-nowrap relative",
               // ✅ NOVO: Largura igual para todos os botões
               "flex-1",
@@ -49,10 +49,10 @@ export const ToggleGroup: React.FC<ToggleGroupProps> = ({
               isLast && "rounded-r-lg",
               // Border handling - remover borda direita exceto no último
               !isLast && "-mr-px",
-              // Selected state - usar azul da marca
+              // Selected state - usar cor da marca
               isSelected
-                ? "bg-blue-600 text-white border-blue-600 shadow-sm z-10"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                ? "bg-auction-600 text-white border-auction-600 shadow-sm z-10"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-neutral-50"
             )}
           >
             {option.label}

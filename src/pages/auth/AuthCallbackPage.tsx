@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 
-export const AuthCallbackPage: React.FC = () => {
+const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,3 +42,5 @@ export const AuthCallbackPage: React.FC = () => {
     </div>
   );
 };
+
+export default AuthCallbackPage;

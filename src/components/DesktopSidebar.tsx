@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Building, Car, Heart, Gavel, User } from 'lucide-react';
+import { useHoverPreload } from '../hooks/useRoutePreload';
 
 export const DesktopSidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -33,29 +34,33 @@ export const DesktopSidebar: React.FC = () => {
 
   const NavButton = ({ item, isActive }: { item: typeof mainNavItems[0], isActive: boolean }) => {
     const Icon = item.icon;
-    
+
+    // 🚀 PRELOAD INTELIGENTE: Precarregar rota no hover
+    const preloadProps = useHoverPreload(item.route, !isActive);
+
     return (
       <button
         onClick={() => handleNavigation(item.route)}
-        className={`w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 group ${
+        {...preloadProps} // 🚀 Adicionar eventos de preload
+        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 group ${
           isActive
-            ? 'bg-blue-600 text-white shadow-lg'
+            ? 'bg-auction-600 text-white shadow-lg'
             : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
         }`}
         title={item.label}
       >
-        <Icon className="w-5 h-5" />
+        <Icon className="w-4 h-4" />
       </button>
     );
   };
 
   // Custom L Logo Component
   const LogoL = () => (
-    <div className="relative w-12 h-12 flex items-center justify-center">
+    <div className="relative w-10 h-10 flex items-center justify-center">
       <svg
-        width="28"
-        height="28"
-        viewBox="0 0 28 28"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="drop-shadow-sm"
@@ -63,8 +68,8 @@ export const DesktopSidebar: React.FC = () => {
         {/* Gradient Definition */}
         <defs>
           <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2563eb" />
-            <stop offset="100%" stopColor="#1d4ed8" />
+            <stop offset="0%" stopColor="#0088D9" />
+            <stop offset="100%" stopColor="#0284c7" />
           </linearGradient>
         </defs>
         
@@ -85,15 +90,15 @@ export const DesktopSidebar: React.FC = () => {
   );
 
   return (
-    <div className="hidden md:flex fixed left-0 top-0 h-full w-20 bg-white/95 backdrop-blur-md border-r border-gray-100 z-40">
-      <div className="flex flex-col w-full items-center py-6">
+    <div className="hidden md:flex fixed left-0 top-0 h-full w-16 bg-white/95 backdrop-blur-md border-r border-gray-100 z-40">
+      <div className="flex flex-col w-full items-center py-4">
         {/* Logo - Now just the L without button styling */}
-        <div className="mb-8">
+        <div className="mb-6">
           <LogoL />
         </div>
 
         <nav className="flex-1 flex flex-col items-center">
-          <div className="space-y-4">
+          <div className="space-y-3">
             {mainNavItems.map((item) => (
               <NavButton
                 key={item.id}

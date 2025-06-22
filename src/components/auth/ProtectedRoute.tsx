@@ -17,8 +17,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <LoadingSpinner size="md" />
+          <p className="mt-3 text-sm text-gray-500">Verificando acesso...</p>
+        </div>
       </div>
     );
   }

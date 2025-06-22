@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 interface PaginationProps {
@@ -8,7 +8,8 @@ interface PaginationProps {
   className?: string;
 }
 
-export const Pagination: React.FC<PaginationProps> = ({
+// 🚀 PERFORMANCE: Memoizar componente para evitar re-renders desnecessários
+export const Pagination: React.FC<PaginationProps> = memo(({
   currentPage,
   totalPages,
   onPageChange,
@@ -24,7 +25,8 @@ export const Pagination: React.FC<PaginationProps> = ({
     return null;
   }
 
-  const getVisiblePages = () => {
+  // 🚀 PERFORMANCE: Memoizar cálculo de páginas visíveis
+  const visiblePages = useMemo(() => {
     const delta = 2;
     const range = [];
     const rangeWithDots = [];
@@ -48,11 +50,10 @@ export const Pagination: React.FC<PaginationProps> = ({
     }
 
     return rangeWithDots;
-  };
+  }, [currentPage, totalPages]); // 🔥 DEPENDÊNCIAS: currentPage, totalPages
 
-  const visiblePages = getVisiblePages();
-
-  const handlePageClick = (page: number | string) => {
+  // 🚀 PERFORMANCE: Memoizar handlers para evitar re-renders
+  const handlePageClick = useCallback((page: number | string) => {
     if (typeof page === 'number' && page !== currentPage && page >= 1 && page <= totalPages) {
       try {
         onPageChange(page);
@@ -60,19 +61,19 @@ export const Pagination: React.FC<PaginationProps> = ({
         console.error('Erro ao mudar página:', error);
       }
     }
-  };
+  }, [currentPage, totalPages, onPageChange]); // 🔥 DEPENDÊNCIAS: currentPage, totalPages, onPageChange
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentPage > 1) {
       handlePageClick(currentPage - 1);
     }
-  };
+  }, [currentPage, handlePageClick]); // 🔥 DEPENDÊNCIAS: currentPage, handlePageClick
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentPage < totalPages) {
       handlePageClick(currentPage + 1);
     }
-  };
+  }, [currentPage, totalPages, handlePageClick]); // 🔥 DEPENDÊNCIAS: currentPage, totalPages, handlePageClick
 
   return (
     <div className={`flex items-center justify-center gap-2 ${className}`}>
@@ -110,7 +111,7 @@ export const Pagination: React.FC<PaginationProps> = ({
               onClick={() => handlePageClick(pageNumber)}
               className={`flex items-center justify-center w-10 h-10 rounded-xl font-semibold transition-all duration-200 active:scale-95 ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-auction-600 text-white shadow-sm'
                   : 'border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
               }`}
             >
@@ -133,4 +134,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       </button>
     </div>
   );
-};
+});
+
+// 🚀 PERFORMANCE: DisplayName para debugging
+Pagination.displayName = 'Pagination';

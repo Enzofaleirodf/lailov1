@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import { AuthUser, auth, profiles, onAuthStateChange } from '../lib/supabase';
 
 interface AuthContextType {
@@ -68,7 +68,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  // 🚀 PERFORMANCE BOOST: Memoizar funções com useCallback
+  const signIn = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
       await auth.signIn(email, password);
@@ -76,9 +77,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
       throw error;
     }
-  };
+  }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     setLoading(true);
     try {
       await auth.signInWithGoogle();
@@ -86,13 +87,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
       throw error;
     }
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
     setLoading(true);
     try {
       const { user: newUser } = await auth.signUp(email, password, fullName);
-      
+
       // Criar perfil do usuário
       if (newUser) {
         await profiles.createProfile(newUser.id, email, fullName);
@@ -101,9 +102,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
       throw error;
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     setLoading(true);
     try {
       await auth.signOut();
@@ -111,17 +112,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
       throw error;
     }
-  };
+  }, []);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     await auth.resetPassword(email);
-  };
+  }, []);
 
-  const updatePassword = async (newPassword: string) => {
+  const updatePassword = useCallback(async (newPassword: string) => {
     await auth.updatePassword(newPassword);
-  };
+  }, []);
 
-  const value: AuthContextType = {
+  // 🚀 PERFORMANCE BOOST: Memoizar isAdmin para evitar recálculos
+  const isAdmin = useMemo(() => user?.role === 'admin', [user?.role]);
+
+  // 🚀 PERFORMANCE BOOST: Memoizar value para evitar re-renders
+  const value: AuthContextType = useMemo(() => ({
     user,
     loading,
     signIn,
@@ -130,8 +135,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     resetPassword,
     updatePassword,
-    isAdmin: user?.role === 'admin'
-  };
+    isAdmin
+  }), [user, loading, signIn, signInWithGoogle, signUp, signOut, resetPassword, updatePassword, isAdmin]);
 
   return (
     <AuthContext.Provider value={value}>

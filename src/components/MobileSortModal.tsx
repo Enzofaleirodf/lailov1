@@ -49,7 +49,7 @@ export const MobileSortModal: React.FC<MobileSortModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <ChevronDown className="w-5 h-5 text-blue-600" />
+            <ChevronDown className="w-5 h-5 text-auction-600" />
             <h3 className="text-xl font-bold text-gray-900">Ordenar por</h3>
           </div>
           <button
@@ -70,7 +70,7 @@ export const MobileSortModal: React.FC<MobileSortModalProps> = ({
             >
               <span className="text-gray-900 font-medium">{option.label}</span>
               {selectedSort === option.value && (
-                <Check className="w-5 h-5 text-blue-600" />
+                <Check className="w-5 h-5 text-auction-600" />
               )}
             </button>
           ))}

@@ -20,7 +20,7 @@ export const FormatToggle: React.FC<FormatToggleProps> = ({
 }) => {
   // ✅ NOVO: Usar opções condicionais ou fallback para opções fixas
   const defaultOptions = [
-    { value: "", label: "Qualquer" }, // ✅ Valor vazio = sem filtro
+    { value: "", label: "Todos" }, // ✅ Valor vazio = sem filtro
     { value: "leilao", label: "Leilão" },
     { value: "venda-direta", label: "Venda Direta" }
   ];
@@ -42,7 +42,7 @@ export const FormatToggle: React.FC<FormatToggleProps> = ({
       options={segmentedOptions}
       value={value || ""}
       onChange={handleSelect}
-      size="md"
+      size="sm"
       className={cn("w-full", disabled && "opacity-50 pointer-events-none")}
       disabled={disabled}
     />

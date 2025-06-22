@@ -48,11 +48,11 @@ export const SortPopover: React.FC<SortPopoverProps> = ({
             onClick={() => handleSelect(option.value)}
             className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-gray-50 transition-colors"
           >
-            <span className={`text-sm ${selectedSort === option.value ? 'text-blue-600 font-medium' : 'text-gray-900'}`}>
+            <span className={`text-sm ${selectedSort === option.value ? 'text-auction-600 font-medium' : 'text-gray-900'}`}>
               {option.label}
             </span>
             {selectedSort === option.value && (
-              <Check className="w-4 h-4 text-blue-600" />
+              <Check className="w-4 h-4 text-auction-600" />
             )}
           </button>
         ))}

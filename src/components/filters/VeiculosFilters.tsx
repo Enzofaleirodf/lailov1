@@ -2,6 +2,7 @@ import * as React from "react"
 import { useEffect } from "react"
 import { ComboBoxSearch } from "./ComboBoxSearch"
 import { RangeSlider } from "./RangeSlider"
+import { SwitchableRangeFilter } from "./SwitchableRangeFilter"
 import { BaseFilters } from "./BaseFilters"
 import { useAppContext } from "../../contexts/AppContext"
 import { useVehicleOptions } from "../../hooks/useVehicleOptions" // ✅ BUSCA DINÂMICA
@@ -18,8 +19,26 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
   const { state, actions } = useAppContext();
   const filters = state.stagedFilters.veiculos;
 
-  // ✅ BUSCA DINÂMICA: Usar hook para buscar dados reais do banco
-  const { brands, models, colors, loading, error, fetchModels } = useVehicleOptions();
+  // 🎯 MAPEAMENTO: Converter slug da URL para categoria do banco
+  const getCategoryFromType = (type: string): string | undefined => {
+    const categoryMap: Record<string, string> = {
+      'carros': 'Carros',
+      'motos': 'Motos',
+      'caminhoes': 'Caminhões',
+      'onibus': 'Ônibus',
+      'maquinas': 'Maquinas',
+      'apoio': 'Apoio',
+      'embarcacoes': 'Embarcações',
+      'recreativos': 'Recreativos',
+      'nao-informado': 'Não Informado'
+    };
+    return type === 'todos' ? undefined : categoryMap[type];
+  };
+
+  const vehicleCategory = getCategoryFromType(currentVehicleType);
+
+  // ✅ BUSCA DINÂMICA: Usar hook para buscar dados reais do banco (POR CATEGORIA)
+  const { brands, models, colors, loading, loadingModels, error, fetchModels } = useVehicleOptions(vehicleCategory);
 
   // ✅ RANGES DINÂMICOS: Buscar valores reais do banco de dados
   const { priceRange, yearRange, loading: rangesLoading, error: rangesError } = useRealRanges({
@@ -28,16 +47,30 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
     showExpiredAuctions: state.showExpiredAuctions
   });
 
-  // ✅ INICIALIZAÇÃO: Usar ranges reais como valores padrão dos sliders
-  const effectiveYearRange = !rangesLoading && yearRange[0] !== 0 && yearRange[1] !== 0 ? yearRange : [1990, 2024];
-  const effectivePriceRange = !rangesLoading && priceRange[0] !== 0 && priceRange[1] !== 0 ? priceRange : [0, 500000];
+  // ✅ CORREÇÃO: Usar ranges dinâmicos do banco de dados
+  const effectiveYearRange: [number, number] = yearRange && yearRange[0] !== 0 && yearRange[1] !== 0 ? yearRange : [1900, new Date().getFullYear() + 1];
+  const effectivePriceRange: [number, number] = priceRange && priceRange[0] !== 0 && priceRange[1] !== 0 ? priceRange : [0, 999999999];
 
-  const effectiveYearValue = filters.ano[0] === 0 && filters.ano[1] === 0 ? effectiveYearRange : filters.ano;
+  // ✅ NOVO: Inputs vazios por padrão - usuário define os valores
+  const effectiveYearValue = filters.ano;
 
-  // ✅ NOVO: Valor mínimo sempre inicia em 0 para preços
-  const effectivePriceValue = filters.preco[0] === 0 && filters.preco[1] === 0
-    ? [0, effectivePriceRange[1]] // Mínimo sempre 0, máximo do range real
-    : filters.preco;
+  // ✅ CORREÇÃO: Preparar opções para filtro de valor com ranges dinâmicos
+  const valorOptions = [
+    {
+      id: 'avaliacao',
+      label: 'Avaliação',
+      prefix: 'R$ ',
+      range: effectivePriceRange,
+      value: filters.valorAvaliacao
+    },
+    {
+      id: 'desconto',
+      label: 'com desconto',
+      prefix: 'R$ ',
+      range: effectivePriceRange,
+      value: filters.valorDesconto
+    }
+  ];
 
 
 
@@ -64,7 +97,10 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
     }
   }, [filters.marca, fetchModels]);
   
-  const shouldShowBrandModelFilters = currentVehicleType !== 'todos' && currentVehicleType !== 'nao-informado';
+  // ✅ CORREÇÃO: Mostrar filtros de marca/modelo apenas para categorias específicas
+  const shouldShowBrandModelFilters = currentVehicleType !== 'todos' &&
+    currentVehicleType !== 'recreativos' &&
+    currentVehicleType !== 'nao-informado';
 
   const handleEstadoChange = (value: string): void => {
     actions.setStagedVeiculosFilters({ estado: value });
@@ -87,7 +123,7 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
   };
 
   const handleMarcaChange = (value: string): void => {
-    actions.setStagedVeiculosFilters({ 
+    actions.setStagedVeiculosFilters({
       marca: value,
       modelo: "" // Reset modelo when marca changes
     });
@@ -105,8 +141,28 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
     actions.setStagedVeiculosFilters({ ano: value });
   };
 
-  const handlePrecoChange = (value: [number, number]): void => {
-    actions.setStagedVeiculosFilters({ preco: value });
+  // ✅ NOVO: Handlers para filtro de valor com switch
+  const handleValorTypeChange = (valorType: string): void => {
+    // 🔧 CORREÇÃO UX: Limpar range anterior ao trocar switch
+    if (valorType === 'avaliacao') {
+      actions.setStagedVeiculosFilters({
+        valorType: 'avaliacao',
+        valorDesconto: [0, 0]  // Limpar valores de desconto
+      });
+    } else {
+      actions.setStagedVeiculosFilters({
+        valorType: 'desconto',
+        valorAvaliacao: [0, 0]  // Limpar valores de avaliação
+      });
+    }
+  };
+
+  const handleValorValueChange = (optionId: string, value: [number, number]): void => {
+    if (optionId === 'avaliacao') {
+      actions.setStagedVeiculosFilters({ valorAvaliacao: value });
+    } else if (optionId === 'desconto') {
+      actions.setStagedVeiculosFilters({ valorDesconto: value });
+    }
   };
 
   return (
@@ -124,16 +180,16 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
       onEtapaChange={handleEtapaChange}
     >
       {/* 🎯 2. CARACTERÍSTICAS DO VEÍCULO - PRIMÁRIO */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+        <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-auction-600 rounded-full"></span>
           Características do Veículo
         </label>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Marca e Modelo */}
           {shouldShowBrandModelFilters && (
             <div>
-              <label className="block text-sm font-medium text-blue-800 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-2">
                 Marca e Modelo
               </label>
               <div className="grid grid-cols-1 gap-2">
@@ -141,17 +197,21 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
                   options={brands}
                   value={filters.marca}
                   onValueChange={handleMarcaChange}
-                  placeholder={loading ? "Carregando marcas..." : LABEL_CONFIG.PLACEHOLDERS.SELECT_BRAND}
+                  placeholder="Marca (em breve)"
                   searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_BRAND}
-                  disabled={loading}
+                  disabled={true}
+                  loading={false}
+                  loadingMessage="Funcionalidade em desenvolvimento..."
                 />
                 <ComboBoxSearch
                   options={models}
                   value={filters.modelo}
                   onValueChange={handleModeloChange}
-                  placeholder={LABEL_CONFIG.PLACEHOLDERS.SELECT_MODEL}
+                  placeholder="Modelo (em breve)"
                   searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_MODEL}
-                  disabled={!filters.marca || filters.marca === "all" || loading}
+                  disabled={true}
+                  loading={false}
+                  loadingMessage="Funcionalidade em desenvolvimento..."
                 />
               </div>
             </div>
@@ -159,40 +219,32 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
 
           {/* Cor */}
           <div>
-            <label className="block text-sm font-medium text-blue-800 mb-2">
+            <label className="block text-xs font-medium text-gray-700 mb-2">
               Cor
             </label>
             <ComboBoxSearch
               options={colors}
               value={filters.cor}
               onValueChange={handleCorChange}
-              placeholder={loading ? "Carregando cores..." : LABEL_CONFIG.PLACEHOLDERS.SELECT_COLOR}
+              placeholder={LABEL_CONFIG.PLACEHOLDERS.SELECT_COLOR}
               searchPlaceholder={LABEL_CONFIG.PLACEHOLDERS.SEARCH_COLOR}
               disabled={loading}
+              loading={loading}
+              loadingMessage="Carregando cores..."
             />
           </div>
 
           {/* Ano */}
           <div>
-            <label className="block text-sm font-medium text-blue-800 mb-2">
+            <label className="block text-xs font-medium text-gray-700 mb-2">
               Ano
             </label>
-            {rangesLoading ? (
-              <div className="space-y-4">
-                <div className="h-2 bg-gray-200 rounded-full animate-pulse"></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-                  <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-                </div>
-              </div>
-            ) : (
-              <RangeSlider
-                min={effectiveYearRange[0]}
-                max={effectiveYearRange[1]}
-                value={effectiveYearValue}
-                onValueChange={handleAnoChange}
-              />
-            )}
+            <RangeSlider
+              min={effectiveYearRange[0]}
+              max={effectiveYearRange[1]}
+              value={effectiveYearValue}
+              onValueChange={handleAnoChange}
+            />
             {rangesError && (
               <p className="text-xs text-amber-600 mt-1">{rangesError}</p>
             )}
@@ -200,33 +252,14 @@ export const VeiculosFilters: React.FC<VeiculosFiltersProps> = ({
         </div>
       </div>
 
-      {/* 🎯 3. VALOR DO LANCE - PRIMÁRIO */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-          Valor do Lance
-        </label>
-        {rangesLoading ? (
-          <div className="space-y-4">
-            <div className="h-2 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-            </div>
-          </div>
-        ) : (
-          <RangeSlider
-            min={effectivePriceRange[0]}
-            max={effectivePriceRange[1]}
-            value={effectivePriceValue}
-            onValueChange={handlePrecoChange}
-            prefix="R$ "
-          />
-        )}
-        {rangesError && (
-          <p className="text-xs text-amber-600 mt-1">{rangesError}</p>
-        )}
-      </div>
+      {/* 🎯 3. VALOR COM SWITCH - PRIMÁRIO */}
+      <SwitchableRangeFilter
+        title="Valor"
+        options={valorOptions}
+        activeOption={filters.valorType}
+        onOptionChange={handleValorTypeChange}
+        onValueChange={handleValorValueChange}
+      />
     </BaseFilters>
   )
 };

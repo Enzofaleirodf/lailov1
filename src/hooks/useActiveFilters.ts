@@ -11,20 +11,23 @@ export const useActiveFilters = ({ category, appliedFilters }: UseActiveFiltersP
       (filters.estado && filters.estado !== "all") ||
       (filters.cidade && filters.cidade !== "all") ||
       filters.formato ||
-      filters.origem.length > 0 ||
-      filters.etapa.length > 0 ||
+      (filters.origem && filters.origem.length > 0) ||
+      (filters.etapa && filters.etapa.length > 0) ||
       (category === 'veiculos' && (
         (filters.marca && filters.marca !== "all") ||
         (filters.modelo && filters.modelo !== "all") ||
         (filters.cor && filters.cor !== "all") ||
-        // ✅ CORREÇÃO: Só considerar ativo se não estiver no estado inicial [0,0]
-        !(filters.ano[0] === 0 && filters.ano[1] === 0) ||
-        !(filters.preco[0] === 0 && filters.preco[1] === 0)
+        // ✅ CORREÇÃO: Verificar se há valores válidos (não undefined)
+        (filters.ano && filters.ano.length > 0 && filters.ano[0] !== undefined && filters.ano[1] !== undefined && (filters.ano[0] > 0 || filters.ano[1] > 0)) ||
+        (filters.valorAvaliacao && filters.valorAvaliacao.length > 0 && filters.valorAvaliacao[0] !== undefined && filters.valorAvaliacao[1] !== undefined && (filters.valorAvaliacao[0] > 0 || filters.valorAvaliacao[1] > 0)) ||
+        (filters.valorDesconto && filters.valorDesconto.length > 0 && filters.valorDesconto[0] !== undefined && filters.valorDesconto[1] !== undefined && (filters.valorDesconto[0] > 0 || filters.valorDesconto[1] > 0))
       )) ||
       (category === 'imoveis' && (
-        // ✅ CORREÇÃO: Só considerar ativo se não estiver no estado inicial [0,0]
-        !(filters.area[0] === 0 && filters.area[1] === 0) ||
-        !(filters.valor[0] === 0 && filters.valor[1] === 0)
+        // ✅ CORREÇÃO: Verificar se há valores válidos (não undefined)
+        (filters.areaM2 && filters.areaM2.length > 0 && filters.areaM2[0] !== undefined && filters.areaM2[1] !== undefined && (filters.areaM2[0] > 0 || filters.areaM2[1] > 0)) ||
+        (filters.areaHectares && filters.areaHectares.length > 0 && filters.areaHectares[0] !== undefined && filters.areaHectares[1] !== undefined && (filters.areaHectares[0] > 0 || filters.areaHectares[1] > 0)) ||
+        (filters.valorAvaliacao && filters.valorAvaliacao.length > 0 && filters.valorAvaliacao[0] !== undefined && filters.valorAvaliacao[1] !== undefined && (filters.valorAvaliacao[0] > 0 || filters.valorAvaliacao[1] > 0)) ||
+        (filters.valorDesconto && filters.valorDesconto.length > 0 && filters.valorDesconto[0] !== undefined && filters.valorDesconto[1] !== undefined && (filters.valorDesconto[0] > 0 || filters.valorDesconto[1] > 0))
       ))
     );
     
@@ -35,19 +38,23 @@ export const useActiveFilters = ({ category, appliedFilters }: UseActiveFiltersP
     appliedFilters.imoveis.estado,
     appliedFilters.imoveis.cidade,
     appliedFilters.imoveis.formato,
-    appliedFilters.imoveis.origem.join(','),
-    appliedFilters.imoveis.etapa.join(','),
-    appliedFilters.imoveis.area.join(','),
-    appliedFilters.imoveis.valor.join(','),
+    (appliedFilters.imoveis.origem || []).join(','),
+    (appliedFilters.imoveis.etapa || []).join(','),
+    // ✅ CORREÇÃO: Usar novos campos de área e valor
+    appliedFilters.imoveis.areaM2?.join(',') || '',
+    appliedFilters.imoveis.areaHectares?.join(',') || '',
+    appliedFilters.imoveis.valorAvaliacao?.join(',') || '',
+    appliedFilters.imoveis.valorDesconto?.join(',') || '',
     appliedFilters.veiculos.estado,
     appliedFilters.veiculos.cidade,
     appliedFilters.veiculos.marca,
     appliedFilters.veiculos.modelo,
     appliedFilters.veiculos.cor,
     appliedFilters.veiculos.formato,
-    appliedFilters.veiculos.origem.join(','),
-    appliedFilters.veiculos.etapa.join(','),
-    appliedFilters.veiculos.ano.join(','),
-    appliedFilters.veiculos.preco.join(',')
+    (appliedFilters.veiculos.origem || []).join(','),
+    (appliedFilters.veiculos.etapa || []).join(','),
+    appliedFilters.veiculos.ano?.join(',') || '',
+    appliedFilters.veiculos.valorAvaliacao?.join(',') || '',
+    appliedFilters.veiculos.valorDesconto?.join(',') || ''
   ]);
 };

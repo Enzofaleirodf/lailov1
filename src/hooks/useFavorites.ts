@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { favorites } from '../lib/database';
 
 export const useFavorites = () => {
   const { user } = useAuth();
@@ -18,14 +17,19 @@ export const useFavorites = () => {
 
   const loadFavorites = async () => {
     if (!user) return;
-    
-    setLoading(true);
+
+    // 🚀 UX CLEAN: Loading discreto apenas para operações lentas
+    const loadingTimeout = setTimeout(() => setLoading(true), 300);
+
     try {
+      // 🚀 DYNAMIC IMPORT para evitar conflito de code splitting
+      const { favorites } = await import('../lib/database');
       const ids = await favorites.getFavoriteIds(user.id);
       setFavoriteIds(ids);
     } catch (error) {
       console.error('Erro ao carregar favoritos:', error);
     } finally {
+      clearTimeout(loadingTimeout);
       setLoading(false);
     }
   };
@@ -36,6 +40,9 @@ export const useFavorites = () => {
     try {
       const isFav = favoriteIds.includes(auctionId);
       
+      // 🚀 DYNAMIC IMPORT para evitar conflito de code splitting
+      const { favorites } = await import('../lib/database');
+
       if (isFav) {
         await favorites.removeFavorite(user.id, auctionId);
         setFavoriteIds(prev => prev.filter(id => id !== auctionId));

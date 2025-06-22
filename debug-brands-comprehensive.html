@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comprehensive Vehicle Brands Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .brand-list { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🚗 Comprehensive Vehicle Brands Debug Test</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const supabaseUrl = 'https://lsuyvkybrmddtsanvmvw.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzdXl2a3licm1kZHRzYW52bXZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzI5NzQsImV4cCI6MjA1MDU0ODk3NH0.Ej_qJOQGGJJOKJOQGGJJOKJOQGGJJOKJOQGGJJOKJOQ';
+        
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h3>${title}</h3>${content}`;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        async function runComprehensiveTest() {
+            console.log('🚗 Starting comprehensive vehicle brands test...');
+            
+            try {
+                // Test 1: Basic query without any filters
+                addResult('Test 1: Basic Query', 'Testing basic query without filters...', 'info');
+                
+                const { data: basicData, error: basicError } = await supabase
+                    .from('lots_vehicle')
+                    .select('brand');
+                
+                if (basicError) {
+                    addResult('Test 1: FAILED', `Error: ${basicError.message}`, 'error');
+                    return;
+                }
+                
+                addResult('Test 1: SUCCESS', `
+                    <p><strong>Total records:</strong> ${basicData.length}</p>
+                    <p><strong>Sample brands:</strong> ${basicData.slice(0, 10).map(item => item.brand).join(', ')}</p>
+                `, 'success');
+                
+                // Test 2: Query with filters (like the app)
+                addResult('Test 2: Filtered Query', 'Testing query with null/empty filters...', 'info');
+                
+                const { data: filteredData, error: filteredError } = await supabase
+                    .from('lots_vehicle')
+                    .select('brand')
+                    .not('brand', 'is', null)
+                    .neq('brand', '')
+                    .order('brand');
+                
+                if (filteredError) {
+                    addResult('Test 2: FAILED', `Error: ${filteredError.message}`, 'error');
+                    return;
+                }
+                
+                const allBrands = filteredData.map(item => item.brand).filter(Boolean);
+                const uniqueBrands = [...new Set(allBrands)];
+                
+                addResult('Test 2: SUCCESS', `
+                    <p><strong>Total records:</strong> ${filteredData.length}</p>
+                    <p><strong>Unique brands:</strong> ${uniqueBrands.length}</p>
+                    <p><strong>First 10:</strong> ${uniqueBrands.slice(0, 10).join(', ')}</p>
+                    <p><strong>Last 10:</strong> ${uniqueBrands.slice(-10).join(', ')}</p>
+                `, 'success');
+                
+                // Test 3: Check for brands after C
+                const brandsAfterC = uniqueBrands.filter(brand => brand.toLowerCase().charAt(0) > 'c');
+                
+                if (brandsAfterC.length === 0) {
+                    addResult('Test 3: CRITICAL ISSUE', 'No brands found after letter C!', 'error');
+                } else {
+                    addResult('Test 3: SUCCESS', `
+                        <p><strong>Brands after C:</strong> ${brandsAfterC.length}</p>
+                        <p><strong>Examples:</strong> ${brandsAfterC.slice(0, 10).join(', ')}</p>
+                    `, 'success');
+                }
+                
+                // Test 4: Test with explicit limit
+                addResult('Test 4: With Limit', 'Testing query with explicit high limit...', 'info');
+                
+                const { data: limitedData, error: limitedError } = await supabase
+                    .from('lots_vehicle')
+                    .select('brand')
+                    .not('brand', 'is', null)
+                    .neq('brand', '')
+                    .order('brand')
+                    .limit(10000);
+                
+                if (limitedError) {
+                    addResult('Test 4: FAILED', `Error: ${limitedError.message}`, 'error');
+                    return;
+                }
+                
+                const limitedUnique = [...new Set(limitedData.map(item => item.brand).filter(Boolean))];
+                
+                addResult('Test 4: SUCCESS', `
+                    <p><strong>With limit 10000:</strong> ${limitedUnique.length} unique brands</p>
+                    <p><strong>Same as unlimited?</strong> ${limitedUnique.length === uniqueBrands.length ? 'YES' : 'NO'}</p>
+                `, limitedUnique.length === uniqueBrands.length ? 'success' : 'warning');
+                
+                // Test 5: Full brand list
+                addResult('Test 5: Complete Brand List', `
+                    <div class="brand-list">
+                        <pre>${uniqueBrands.join('\n')}</pre>
+                    </div>
+                `, 'info');
+                
+                // Test 6: Letter distribution
+                const distribution = {};
+                uniqueBrands.forEach(brand => {
+                    const firstLetter = brand.charAt(0).toUpperCase();
+                    distribution[firstLetter] = (distribution[firstLetter] || 0) + 1;
+                });
+                
+                addResult('Test 6: Letter Distribution', `
+                    <pre>${JSON.stringify(distribution, null, 2)}</pre>
+                `, 'info');
+                
+                // Final summary
+                const summary = {
+                    totalRecords: filteredData.length,
+                    uniqueBrands: uniqueBrands.length,
+                    brandsAfterC: brandsAfterC.length,
+                    lettersCovered: Object.keys(distribution).length,
+                    hasIssue: brandsAfterC.length === 0 || uniqueBrands.length < 50
+                };
+                
+                addResult('FINAL SUMMARY', `
+                    <pre>${JSON.stringify(summary, null, 2)}</pre>
+                    <p><strong>Status:</strong> ${summary.hasIssue ? '❌ ISSUE DETECTED' : '✅ ALL GOOD'}</p>
+                `, summary.hasIssue ? 'error' : 'success');
+                
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                addResult('CRITICAL ERROR', `Unexpected error: ${err.message}`, 'error');
+            }
+        }
+        
+        // Run the test
+        runComprehensiveTest();
+    </script>
+</body>
+</html>

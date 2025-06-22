@@ -39,7 +39,7 @@ export const SegmentedToggleOptional: React.FC<SegmentedToggleOptionalProps> = (
           key={option.value}
           value={option.value}
           variant="outline"
-          className="data-[state=on]:bg-blue-600 data-[state=on]:text-white"
+          className="data-[state=on]:bg-auction-600 data-[state=on]:text-white"
         >
           {option.label}
         </ToggleGroupItem>

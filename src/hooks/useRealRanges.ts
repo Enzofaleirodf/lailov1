@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { auctions } from '../lib/database';
 import { Category } from '../types/auction';
 import { FILTER_CONFIG } from '../config/constants';
 import { MAPPINGS } from '../config/mappings';
@@ -38,11 +37,12 @@ export const useRealRanges = ({
   currentType,
   showExpiredAuctions = false
 }: UseRealRangesParams): RealRanges => {
+  // 🚀 UX CLEAN: Começar com ranges padrão válidos para permitir input
   const [ranges, setRanges] = useState<RealRanges>({
-    areaRange: [0, 0],
-    priceRange: [0, 0],
-    yearRange: [0, 0],
-    loading: true,
+    areaRange: category === 'imoveis' ? [0, 999999] : [0, 0],
+    priceRange: [0, 999999999],
+    yearRange: category === 'veiculos' ? [1900, new Date().getFullYear() + 1] : [0, 0],
+    loading: false, // 🔥 MUDANÇA: Não mostrar loading inicial
     error: null
   });
 
@@ -74,6 +74,7 @@ export const useRealRanges = ({
 
       requestInProgress.current = true;
       try {
+        // 🚀 UX CLEAN: Loading discreto apenas durante fetch
         setRanges(prev => ({ ...prev, loading: true, error: null }));
 
         if (category === 'imoveis') {
@@ -90,29 +91,22 @@ export const useRealRanges = ({
             }
           }
 
-          // Buscar dados para calcular ranges
-          const properties = await auctions.getProperties({
+          // 🚀 DYNAMIC IMPORT para evitar conflito de code splitting
+          const { auctions } = await import('../lib/database');
+
+          // 🚀 PERFORMANCE BOOST: Usar agregação otimizada em vez de buscar 10k registros
+          const ranges = await auctions.getPropertyRanges({
             showExpiredAuctions,
-            ...(propertyCategories ? { property_categories: propertyCategories } : {}),
-            limit: 10000 // Buscar muitos para ter ranges precisos
+            ...(propertyCategories ? { property_categories: propertyCategories } : {})
           });
 
-          // Calcular ranges reais
-          const areas = properties
-            .map(p => p.useful_area_m2)
-            .filter((area): area is number => area !== null && area !== undefined && area > 0);
-
-          const prices = properties
-            .map(p => p.initial_bid_value)
-            .filter((price): price is number => price !== null && price !== undefined && price > 0);
-
           // Definir ranges ou usar fallback
-          const areaRange: [number, number] = areas.length > 0 
-            ? [Math.min(...areas), Math.max(...areas)]
+          const areaRange: [number, number] = (ranges.minArea !== null && ranges.maxArea !== null)
+            ? [ranges.minArea, ranges.maxArea]
             : [FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_AREA.MIN, FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_AREA.MAX];
 
-          const priceRange: [number, number] = prices.length > 0
-            ? [Math.min(...prices), Math.max(...prices)]
+          const priceRange: [number, number] = (ranges.minPrice !== null && ranges.maxPrice !== null)
+            ? [ranges.minPrice, ranges.maxPrice]
             : [FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_VALUE.MIN, FILTER_CONFIG.DEFAULT_RANGES.PROPERTY_VALUE.MAX];
 
           const result = {
@@ -149,29 +143,22 @@ export const useRealRanges = ({
             }
           }
 
-          // Buscar dados para calcular ranges
-          const vehicles = await auctions.getVehicles({
+          // 🚀 DYNAMIC IMPORT para evitar conflito de code splitting
+          const { auctions } = await import('../lib/database');
+
+          // 🚀 PERFORMANCE BOOST: Usar agregação otimizada em vez de buscar 10k registros
+          const ranges = await auctions.getVehicleRanges({
             showExpiredAuctions,
-            ...(vehicleTypes ? { vehicle_types: vehicleTypes } : {}),
-            limit: 10000 // Buscar muitos para ter ranges precisos
+            ...(vehicleTypes ? { vehicle_types: vehicleTypes } : {})
           });
 
-          // Calcular ranges reais
-          const years = vehicles
-            .map(v => v.year)
-            .filter((year): year is number => year !== null && year !== undefined && year > 0);
-
-          const prices = vehicles
-            .map(v => v.initial_bid_value)
-            .filter((price): price is number => price !== null && price !== undefined && price > 0);
-
           // Definir ranges ou usar fallback
-          const yearRange: [number, number] = years.length > 0
-            ? [Math.min(...years), Math.max(...years)]
+          const yearRange: [number, number] = (ranges.minYear !== null && ranges.maxYear !== null)
+            ? [ranges.minYear, ranges.maxYear]
             : [FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_YEAR.MIN, FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_YEAR.MAX];
 
-          const priceRange: [number, number] = prices.length > 0
-            ? [Math.min(...prices), Math.max(...prices)]
+          const priceRange: [number, number] = (ranges.minPrice !== null && ranges.maxPrice !== null)
+            ? [ranges.minPrice, ranges.maxPrice]
             : [FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_PRICE.MIN, FILTER_CONFIG.DEFAULT_RANGES.VEHICLE_PRICE.MAX];
 
           const result = {

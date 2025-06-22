@@ -72,13 +72,13 @@ export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
 
 // ===== MAPEAMENTOS PARA FILTROS =====
 // ✅ CORREÇÃO: Usar APENAS os valores REAIS do banco de dados
-// ✅ CORREÇÃO CRÍTICA: Mapeamento correto para vehicle_type
+// ✅ CORREÇÃO CRÍTICA: Mapeamento correto para vehicle_category
 export const VEHICLE_TYPE_MAP: Record<string, string[]> = {
   'carros': ['Carros'],
   'motos': ['Motos'],
   'caminhoes': ['Caminhões'],
   'onibus': ['Ônibus'],
-  'maquinas': ['Máquinas'],
+  'maquinas': ['Maquinas'],
   'apoio': ['Apoio'],
   'embarcacoes': ['Embarcações'],
   'recreativos': ['Recreativos']
@@ -122,12 +122,12 @@ export const ORIGIN_MAP: Record<string, string> = {
 };
 
 // ===== MAPEAMENTOS DE ETAPA =====
-// ✅ CORREÇÃO: Usar valores REAIS do banco de dados com capitalização correta
+// ✅ CORREÇÃO: Mapear valores do frontend para valores do banco (1, 2, 3)
 export const STAGE_MAP: Record<string, string> = {
-  'praca-unica': 'Praça Única', // ✅ Valor real: "Praça Única" (6.284 registros) - capitalização corrigida
-  'primeira': '1ª Praça', // ✅ Valor real: "1ª Praça" (7.444 registros)
-  'segunda': '2ª Praça', // ✅ Valor real: "2ª Praça" (4.257 registros)
-  'terceira': '3ª Praça', // ✅ Valor real: "3ª Praça" (216 registros)
+  'praca-unica': 'Praça Única', // ✅ Valor real: "Praça Única"
+  'primeira': '1', // ✅ CORREÇÃO: Banco usa "1" para 1ª Praça
+  'segunda': '2', // ✅ CORREÇÃO: Banco usa "2" para 2ª Praça
+  'terceira': '3', // ✅ CORREÇÃO: Banco usa "3" para 3ª Praça
   'nao-informado': '__NAO_INFORMADO__' // ✅ NOVO: Para valores null/empty/outros
 };
 
@@ -136,7 +136,7 @@ export const SORT_LABELS: Record<string, string> = {
   'newest': 'Mais recentes',
   'lowest-bid': 'Menor valor',
   'highest-bid': 'Maior valor',
-  'highest-discount': 'Maior desconto %', // ✅ NOVO: Adicionar % no label
+  'highest-discount': 'Maior desconto',
   'nearest': 'Mais próximos'
 };
 

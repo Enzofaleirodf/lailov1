@@ -2,6 +2,7 @@ import * as React from "react"
 import { ComboBoxSearch } from "./ComboBoxSearch"
 import { FormatToggle } from "./FormatToggle"
 import { MultiToggleGrid } from "./MultiToggleGrid"
+import { CheckboxGroup } from "../ui/CheckboxGroup"
 import { useConditionalOptions } from "../../hooks/useConditionalOptions"
 import { Category } from "../../types/auction"
 
@@ -76,19 +77,19 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* 🎯 1. LOCALIZAÇÃO - PRIMÁRIO */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+        <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-auction-600 rounded-full"></span>
           Localização
         </label>
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-2">
           <ComboBoxSearch
             options={estados}
             value={estado}
             onValueChange={handleEstadoChange}
-            placeholder={loading ? "Carregando estados..." : "Estado"}
+            placeholder="Estado"
             searchPlaceholder="Buscar estado..."
             disabled={loading}
           />
@@ -96,7 +97,7 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
             options={cidades}
             value={cidade}
             onValueChange={handleCidadeChange}
-            placeholder={loading ? "Carregando cidades..." : "Cidade"}
+            placeholder="Cidade"
             searchPlaceholder="Buscar cidade..."
             disabled={!estado || estado === "all" || loading}
           />
@@ -107,15 +108,15 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
       {children}
 
       {/* 🎛️ FILTROS AVANÇADOS */}
-      <div className="space-y-6 pt-4 border-t-2 border-gray-100">
-        <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+      <div className="space-y-4 pt-3 border-t border-gray-200">
+        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
           Filtros Avançados
         </div>
 
-        {/* Formato - AZUL PADRONIZADO */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-          <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+        {/* Formato - PROFISSIONAL */}
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+          <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-auction-600 rounded-full"></span>
             Formato
           </label>
           <FormatToggle
@@ -126,13 +127,13 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
           />
         </div>
 
-        {/* Origem - AZUL PADRONIZADO */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-          <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+        {/* Origem - PROFISSIONAL */}
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+          <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-auction-600 rounded-full"></span>
             Origem
           </label>
-          <MultiToggleGrid
+          <CheckboxGroup
             options={origens}
             value={origem}
             onValueChange={onOrigemChange}
@@ -140,20 +141,20 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
           />
         </div>
 
-        {/* Etapa - AZUL PADRONIZADO */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-          <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+        {/* Etapa - PROFISSIONAL */}
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+          <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-auction-600 rounded-full"></span>
             Etapa
           </label>
-          <MultiToggleGrid
+          <CheckboxGroup
             options={etapas}
             value={etapa}
             onValueChange={onEtapaChange}
             disabled={isVendaDireta || loading}
           />
           {/* Espaço reservado para mensagem condicional para evitar layout shift */}
-          <div className="min-h-[16px] mt-2">
+          <div className="min-h-[14px] mt-2">
             {isVendaDireta && (
               <p className="text-xs text-gray-500">
                 Etapas não se aplicam à venda direta
@@ -165,7 +166,7 @@ export const BaseFilters: React.FC<BaseFiltersProps> = ({
 
       {/* Mostrar erro se houver */}
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+        <div className="text-sm text-error-600 bg-error-50 p-3 rounded-lg">
           {error}
         </div>
       )}

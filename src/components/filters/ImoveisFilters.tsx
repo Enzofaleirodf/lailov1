@@ -1,5 +1,5 @@
 import * as React from "react"
-import { RangeSlider } from "./RangeSlider"
+import { SwitchableRangeFilter } from "./SwitchableRangeFilter"
 import { BaseFilters } from "./BaseFilters"
 import { useAppContext } from "../../contexts/AppContext"
 import { useRealRanges } from "../../hooks/useRealRanges"
@@ -21,19 +21,44 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
     showExpiredAuctions: state.showExpiredAuctions
   });
 
-  // ✅ INICIALIZAÇÃO: Usar ranges reais como valores padrão dos sliders
-  const effectiveAreaRange = !rangesLoading && areaRange[0] !== 0 && areaRange[1] !== 0 ? areaRange : [0, 1000];
-  const effectivePriceRange = !rangesLoading && priceRange[0] !== 0 && priceRange[1] !== 0 ? priceRange : [0, 5000000];
+  // ✅ CORREÇÃO: Usar ranges grandes para permitir qualquer valor
+  const effectiveAreaRange: [number, number] = [0, 999999];
+  const effectivePriceRange: [number, number] = [0, 999999999];
 
-  // ✅ NOVO: Valor mínimo sempre inicia em 0 para área
-  const effectiveAreaValue = filters.area[0] === 0 && filters.area[1] === 0
-    ? [0, effectiveAreaRange[1]] // Mínimo sempre 0, máximo do range real
-    : filters.area;
+  // ✅ CORREÇÃO: Usar ranges dinâmicos do banco de dados
+  const areaOptions = [
+    {
+      id: 'm2',
+      label: 'm²',
+      suffix: 'm²',
+      range: areaRange && areaRange[0] !== 0 && areaRange[1] !== 0 ? areaRange : [0, 999999] as [number, number],
+      value: filters.areaM2
+    },
+    {
+      id: 'hectares',
+      label: 'ha',
+      suffix: 'ha',
+      range: areaRange && areaRange[0] !== 0 && areaRange[1] !== 0 ? [Math.floor(areaRange[0] / 10000), Math.ceil(areaRange[1] / 10000)] : [0, 100] as [number, number],
+      value: filters.areaHectares
+    }
+  ];
 
-  // ✅ NOVO: Valor mínimo sempre inicia em 0 para preços
-  const effectivePriceValue = filters.valor[0] === 0 && filters.valor[1] === 0
-    ? [0, effectivePriceRange[1]] // Mínimo sempre 0, máximo do range real
-    : filters.valor;
+  const valorOptions = [
+    {
+      id: 'avaliacao',
+      label: 'Avaliação',
+      prefix: 'R$ ',
+      range: priceRange && priceRange[0] !== 0 && priceRange[1] !== 0 ? priceRange : [0, 999999999] as [number, number],
+      value: filters.valorAvaliacao
+    },
+    {
+      id: 'desconto',
+      label: 'com desconto',
+      prefix: 'R$ ',
+      range: priceRange && priceRange[0] !== 0 && priceRange[1] !== 0 ? priceRange : [0, 999999999] as [number, number],
+      value: filters.valorDesconto
+    }
+  ];
 
 
 
@@ -74,12 +99,40 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
     actions.setStagedImoveisFilters({ etapa: value });
   };
 
-  const handleAreaChange = (value: [number, number]) => {
-    actions.setStagedImoveisFilters({ area: value });
+  // ✅ NOVO: Handlers para filtros com switch
+  const handleAreaTypeChange = (areaType: string) => {
+    actions.setStagedImoveisFilters({ areaType: areaType as 'm2' | 'hectares' });
   };
 
-  const handleValorChange = (value: [number, number]) => {
-    actions.setStagedImoveisFilters({ valor: value });
+  const handleAreaValueChange = (optionId: string, value: [number, number]) => {
+    if (optionId === 'm2') {
+      actions.setStagedImoveisFilters({ areaM2: value });
+    } else if (optionId === 'hectares') {
+      actions.setStagedImoveisFilters({ areaHectares: value });
+    }
+  };
+
+  const handleValorTypeChange = (valorType: string) => {
+    // 🔧 CORREÇÃO UX: Limpar range anterior ao trocar switch
+    if (valorType === 'avaliacao') {
+      actions.setStagedImoveisFilters({
+        valorType: 'avaliacao',
+        valorDesconto: [0, 0]  // Limpar valores de desconto
+      });
+    } else {
+      actions.setStagedImoveisFilters({
+        valorType: 'desconto',
+        valorAvaliacao: [0, 0]  // Limpar valores de avaliação
+      });
+    }
+  };
+
+  const handleValorValueChange = (optionId: string, value: [number, number]) => {
+    if (optionId === 'avaliacao') {
+      actions.setStagedImoveisFilters({ valorAvaliacao: value });
+    } else if (optionId === 'desconto') {
+      actions.setStagedImoveisFilters({ valorDesconto: value });
+    }
   };
 
   return (
@@ -96,61 +149,23 @@ export const ImoveisFilters: React.FC<ImoveisFiltersProps> = ({
       onOrigemChange={handleOrigemChange}
       onEtapaChange={handleEtapaChange}
     >
-      {/* 🎯 2. ÁREA - PRIMÁRIO */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-          Área
-        </label>
-        {rangesLoading ? (
-          <div className="space-y-4">
-            <div className="h-2 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-            </div>
-          </div>
-        ) : (
-          <RangeSlider
-            min={effectiveAreaRange[0]}
-            max={effectiveAreaRange[1]}
-            value={effectiveAreaValue}
-            onValueChange={handleAreaChange}
-            suffix="m²"
-          />
-        )}
-        {error && (
-          <p className="text-xs text-amber-600 mt-1">{error}</p>
-        )}
-      </div>
+      {/* 🎯 2. ÁREA COM SWITCH - PRIMÁRIO */}
+      <SwitchableRangeFilter
+        title="Área"
+        options={areaOptions}
+        activeOption={filters.areaType}
+        onOptionChange={handleAreaTypeChange}
+        onValueChange={handleAreaValueChange}
+      />
 
-      {/* 🎯 3. VALOR DO LANCE - PRIMÁRIO */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-        <label className="block text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-          Valor do Lance
-        </label>
-        {rangesLoading ? (
-          <div className="space-y-4">
-            <div className="h-2 bg-gray-200 rounded-full animate-pulse"></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
-            </div>
-          </div>
-        ) : (
-          <RangeSlider
-            min={effectivePriceRange[0]}
-            max={effectivePriceRange[1]}
-            value={effectivePriceValue}
-            onValueChange={handleValorChange}
-            prefix="R$ "
-          />
-        )}
-        {error && (
-          <p className="text-xs text-amber-600 mt-1">{error}</p>
-        )}
-      </div>
+      {/* 🎯 3. VALOR COM SWITCH - PRIMÁRIO */}
+      <SwitchableRangeFilter
+        title="Valor"
+        options={valorOptions}
+        activeOption={filters.valorType}
+        onOptionChange={handleValorTypeChange}
+        onValueChange={handleValorValueChange}
+      />
     </BaseFilters>
   )
 };

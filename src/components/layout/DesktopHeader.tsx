@@ -30,17 +30,17 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
           <div className="flex-1">
             <TypeNavigationTabs category={category} />
           </div>
-          
+
           {/* Divider */}
           <div className="h-8 w-px bg-gray-200 mx-4"></div>
-          
+
           {/* View Toggle */}
           <div className="flex bg-gray-100 rounded-lg p-1 flex-shrink-0">
             <button
               onClick={handleHorizontalView}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'horizontal'
-                  ? 'bg-white text-blue-600 shadow-sm'
+                  ? 'bg-white text-auction-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
               title="Visualização horizontal"
@@ -51,7 +51,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
               onClick={handleVerticalView}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'vertical'
-                  ? 'bg-white text-blue-600 shadow-sm'
+                  ? 'bg-white text-auction-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
               title="Visualização em grade"

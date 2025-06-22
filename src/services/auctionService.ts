@@ -91,7 +91,7 @@ export function filterByType(auctions: Auction[], category: Category, type?: str
   return auctions.filter((auction) => {
     if (category === 'veiculos') {
       const allowedTypes = MAPPINGS.VEHICLE_TYPE_MAP[type];
-      return allowedTypes && allowedTypes.includes(auction.vehicle_type || '');
+      return allowedTypes && allowedTypes.includes(auction.vehicle_category || '');
     } else {
       const allowedTypes = MAPPINGS.PROPERTY_TYPE_MAP[type];
       return allowedTypes && allowedTypes.includes(auction.property_type || '');
@@ -254,7 +254,7 @@ export function applySearch(auctions: Auction[], searchQuery?: string): Auction[
     const searchableText = [
       auction.property_type,
       auction.property_address,
-      auction.vehicle_type,
+      auction.vehicle_category,
       auction.brand,
       auction.model,
       auction.city,

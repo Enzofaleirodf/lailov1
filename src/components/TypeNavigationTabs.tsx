@@ -175,11 +175,11 @@ export const TypeNavigationTabs: React.FC<TypeNavigationTabsProps> = React.memo(
       <button
         onClick={handleClick}
         className={`
-          px-3 py-2 text-sm font-medium transition-all duration-200 
-          whitespace-nowrap flex-shrink-0 rounded-xl
+          px-3 py-2 text-sm font-semibold transition-all duration-200
+          whitespace-nowrap flex-shrink-0 rounded-xl active:scale-95 flex items-center justify-center
           ${isActive
-            ? 'bg-blue-600 text-white'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ? 'bg-auction-600 text-white shadow-lg'
+            : 'text-gray-600 hover:text-auction-600 hover:bg-gray-100 border border-transparent hover:border-gray-200'
           }
         `}
       >
@@ -237,7 +237,7 @@ export const TypeNavigationTabs: React.FC<TypeNavigationTabsProps> = React.memo(
         <div className="relative">
           <div 
             ref={mobileTabsRef}
-            className="flex overflow-x-auto scrollbar-hide gap-2 py-3" 
+            className="flex overflow-x-auto scrollbar-hide gap-2 py-2"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {tabs.map((tab) => (
@@ -250,13 +250,13 @@ export const TypeNavigationTabs: React.FC<TypeNavigationTabsProps> = React.memo(
             ))}
           </div>
 
-          <div 
+          <div
             className={`absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/90 via-white/60 to-transparent pointer-events-none transition-opacity duration-300 ${
               showLeftGradient ? 'opacity-100' : 'opacity-0'
             }`}
           />
 
-          <div 
+          <div
             className={`absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/90 via-white/60 to-transparent pointer-events-none transition-opacity duration-300 ${
               showRightGradient ? 'opacity-100' : 'opacity-0'
             }`}

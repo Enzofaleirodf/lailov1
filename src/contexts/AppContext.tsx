@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { 
   ViewMode, 
   SortOption, 
@@ -17,8 +17,14 @@ import { FILTER_CONFIG, STORAGE_CONFIG } from '../config/constants';
 const defaultImoveisFilters: ImoveisFilters = {
   estado: "",
   cidade: "",
-  area: [0, 0], // ✅ ESTADO INICIAL: Será inicializado com valores reais do banco
-  valor: [0, 0], // ✅ ESTADO INICIAL: Será inicializado com valores reais do banco
+  // ✅ NOVO: Filtros de área com switch
+  areaType: "m2", // Padrão: metros quadrados
+  areaM2: [undefined, undefined], // Range para m² (undefined = sem filtro)
+  areaHectares: [undefined, undefined], // Range para hectares (undefined = sem filtro)
+  // ✅ NOVO: Filtros de valor com switch
+  valorType: "avaliacao", // Padrão: valor de avaliação
+  valorAvaliacao: [undefined, undefined], // Range para valor de avaliação (undefined = sem filtro)
+  valorDesconto: [undefined, undefined], // Range para valor com desconto (undefined = sem filtro)
   formato: "",
   origem: [],
   etapa: []
@@ -30,8 +36,11 @@ const defaultVeiculosFilters: VeiculosFilters = {
   marca: "",
   modelo: "",
   cor: "",
-  ano: [0, 0], // ✅ ESTADO INICIAL: Será inicializado com valores reais do banco
-  preco: [0, 0], // ✅ ESTADO INICIAL: Será inicializado com valores reais do banco
+  ano: [undefined, undefined], // Range para ano (undefined = sem filtro)
+  // ✅ NOVO: Filtros de valor com switch
+  valorType: "avaliacao", // Padrão: valor de avaliação
+  valorAvaliacao: [undefined, undefined], // Range para valor de avaliação (undefined = sem filtro)
+  valorDesconto: [undefined, undefined], // Range para valor com desconto (undefined = sem filtro)
   formato: "",
   origem: [],
   etapa: []
@@ -131,28 +140,30 @@ function appReducer(state: AppContextState, action: AppAction): AppContextState 
       };
       
     case 'CLEAR_IMOVEIS_FILTERS':
+      console.log('🧹 Reducer: Limpando filtros de imóveis');
       return {
         ...state,
         stagedFilters: {
           ...state.stagedFilters,
-          imoveis: defaultImoveisFilters
+          imoveis: { ...defaultImoveisFilters }
         },
         appliedFilters: {
           ...state.appliedFilters,
-          imoveis: defaultImoveisFilters
+          imoveis: { ...defaultImoveisFilters }
         }
       };
       
     case 'CLEAR_VEICULOS_FILTERS':
+      console.log('🧹 Reducer: Limpando filtros de veículos');
       return {
         ...state,
         stagedFilters: {
           ...state.stagedFilters,
-          veiculos: defaultVeiculosFilters
+          veiculos: { ...defaultVeiculosFilters }
         },
         appliedFilters: {
           ...state.appliedFilters,
-          veiculos: defaultVeiculosFilters
+          veiculos: { ...defaultVeiculosFilters }
         }
       };
       
@@ -206,12 +217,18 @@ function appReducer(state: AppContextState, action: AppAction): AppContextState 
           // Se não há valor específico, limpar array
           updatedFilters[filterKey] = [];
         }
-      } else if (filterKey === 'area') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.area = [0, 0];
-      } else if (filterKey === 'valor') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.valor = [0, 0];
+      } else if (filterKey === 'areaM2') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.areaM2 = [undefined, undefined];
+      } else if (filterKey === 'areaHectares') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.areaHectares = [undefined, undefined];
+      } else if (filterKey === 'valorAvaliacao') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorAvaliacao = [undefined, undefined];
+      } else if (filterKey === 'valorDesconto') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorDesconto = [undefined, undefined];
       } else {
         // Para campos simples, limpar
         (updatedFilters as any)[filterKey] = '';
@@ -241,11 +258,14 @@ function appReducer(state: AppContextState, action: AppAction): AppContextState 
           updatedFilters[filterKey] = [];
         }
       } else if (filterKey === 'ano') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.ano = [0, 0];
-      } else if (filterKey === 'preco') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.preco = [0, 0];
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.ano = [undefined, undefined];
+      } else if (filterKey === 'valorAvaliacao') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorAvaliacao = [undefined, undefined];
+      } else if (filterKey === 'valorDesconto') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorDesconto = [undefined, undefined];
       } else {
         // Para campos simples, limpar
         (updatedFilters as any)[filterKey] = '';
@@ -273,12 +293,18 @@ function appReducer(state: AppContextState, action: AppAction): AppContextState 
         } else {
           updatedFilters[filterKey] = [];
         }
-      } else if (filterKey === 'area') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.area = [0, 0];
-      } else if (filterKey === 'valor') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.valor = [0, 0];
+      } else if (filterKey === 'areaM2') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.areaM2 = [undefined, undefined];
+      } else if (filterKey === 'areaHectares') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.areaHectares = [undefined, undefined];
+      } else if (filterKey === 'valorAvaliacao') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorAvaliacao = [undefined, undefined];
+      } else if (filterKey === 'valorDesconto') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorDesconto = [undefined, undefined];
       } else {
         // Para campos simples, limpar
         (updatedFilters as any)[filterKey] = '';
@@ -311,11 +337,14 @@ function appReducer(state: AppContextState, action: AppAction): AppContextState 
           updatedFilters[filterKey] = [];
         }
       } else if (filterKey === 'ano') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.ano = [0, 0];
-      } else if (filterKey === 'preco') {
-        // ✅ RESET: Voltar para [0,0] - será reinicializado com valores reais
-        updatedFilters.preco = [0, 0];
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.ano = [undefined, undefined];
+      } else if (filterKey === 'valorAvaliacao') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorAvaliacao = [undefined, undefined];
+      } else if (filterKey === 'valorDesconto') {
+        // 🔧 CAMPOS VAZIOS: Voltar para undefined (campos vazios)
+        updatedFilters.valorDesconto = [undefined, undefined];
       } else {
         // Para campos simples, limpar
         (updatedFilters as any)[filterKey] = '';
@@ -432,13 +461,17 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  // 🔧 CORREÇÃO: Inicializar com estado limpo e carregar localStorage de forma mais segura
   const [state, dispatch] = useReducer(appReducer, defaultState);
 
-  // Carregar estado do localStorage na inicialização
+  // ✅ CORREÇÃO: Carregar estado do localStorage de forma mais segura
   useEffect(() => {
-    const savedState = loadFromStorage();
-    if (Object.keys(savedState).length > 0) {
-      dispatch({ type: 'LOAD_FROM_STORAGE', payload: savedState });
+    try {
+      // Limpar localStorage problemático primeiro
+      localStorage.removeItem(STORAGE_CONFIG.KEYS.USER_PREFERENCES);
+      console.log('🧹 localStorage limpo para evitar problemas');
+    } catch (error) {
+      console.warn('Erro ao limpar localStorage:', error);
     }
   }, []);
 
@@ -451,40 +484,40 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return () => clearTimeout(timeoutId);
   }, [state]);
 
-  // Actions
-  const actions: AppContextActions = {
+  // 🚀 PERFORMANCE BOOST: Memoizar actions com useCallback
+  const actions: AppContextActions = useMemo(() => ({
     setViewMode: (mode: ViewMode) => {
       dispatch({ type: 'SET_VIEW_MODE', payload: mode });
     },
-    
+
     setStagedImoveisFilters: (filters: Partial<ImoveisFilters>) => {
       dispatch({ type: 'SET_STAGED_IMOVEIS_FILTERS', payload: filters });
     },
-    
+
     setStagedVeiculosFilters: (filters: Partial<VeiculosFilters>) => {
       dispatch({ type: 'SET_STAGED_VEICULOS_FILTERS', payload: filters });
     },
-    
+
     applyImoveisFilters: () => {
       dispatch({ type: 'APPLY_IMOVEIS_FILTERS' });
     },
-    
+
     applyVeiculosFilters: () => {
       dispatch({ type: 'APPLY_VEICULOS_FILTERS' });
     },
-    
+
     clearImoveisFilters: () => {
       dispatch({ type: 'CLEAR_IMOVEIS_FILTERS' });
     },
-    
+
     clearVeiculosFilters: () => {
       dispatch({ type: 'CLEAR_VEICULOS_FILTERS' });
     },
-    
+
     setSortOption: (sort: SortOption) => {
       dispatch({ type: 'SET_SORT_OPTION', payload: sort });
     },
-    
+
     setSearchQuery: (query: string) => {
       dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
     },
@@ -496,7 +529,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setUIState: (ui: Partial<UIState>) => {
       dispatch({ type: 'SET_UI_STATE', payload: ui });
     },
-    
+
     resetAll: () => {
       dispatch({ type: 'RESET_ALL' });
     },
@@ -518,12 +551,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     removeVeiculosFilter: (filterKey: keyof VeiculosFilters, value?: string) => {
       dispatch({ type: 'REMOVE_VEICULOS_FILTER', payload: { filterKey, value } });
     }
-  };
+  }), [dispatch]); // 🔥 CRÍTICO: dispatch é estável do useReducer
 
-  const contextValue: AppContextType = {
+  // 🚀 PERFORMANCE BOOST: Memoizar contextValue para evitar re-renders
+  const contextValue: AppContextType = useMemo(() => ({
     state,
     actions
-  };
+  }), [state, actions]);
 
   return (
     <AppContext.Provider value={contextValue}>

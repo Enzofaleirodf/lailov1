@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Search, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFavorites } from '../hooks/useFavorites';
-import { favorites, auctions } from '../lib/database';
-import { AuctionCard } from '../components/AuctionCard';
+// 🚀 DYNAMIC IMPORTS serão usados dentro das funções
+import { SmartAuctionGrid } from '../components/layout/SmartAuctionGrid';
 import { Auction } from '../types/auction';
 
-export const FavoritosPage: React.FC = () => {
+const FavoritosPage: React.FC = () => {
   const { user } = useAuth();
   const { favoriteIds, loading: favoritesLoading } = useFavorites();
   const [favoriteAuctions, setFavoriteAuctions] = useState<Auction[]>([]);
@@ -25,10 +25,14 @@ export const FavoritosPage: React.FC = () => {
   const loadFavoriteAuctions = async () => {
     if (!user || favoriteIds.length === 0) return;
 
-    setLoading(true);
+    // 🚀 UX CLEAN: Loading discreto apenas se demorar
+    const loadingTimeout = setTimeout(() => setLoading(true), 200);
     setError(null);
 
     try {
+      // 🚀 DYNAMIC IMPORT para evitar conflito de code splitting
+      const { favorites, auctions } = await import('../lib/database');
+
       const favoritesList = await favorites.getUserFavorites(user.id);
       const auctionPromises = favoritesList.map(async (fav) => {
         try {
@@ -78,6 +82,7 @@ export const FavoritosPage: React.FC = () => {
       console.error('Erro ao carregar favoritos:', err);
       setError('Erro ao carregar seus favoritos');
     } finally {
+      clearTimeout(loadingTimeout);
       setLoading(false);
     }
   };
@@ -102,7 +107,7 @@ export const FavoritosPage: React.FC = () => {
 
             <a
               href="/auth/login"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 bg-auction-600 text-white font-medium rounded-xl hover:bg-auction-700 transition-colors"
             >
               Fazer Login
             </a>
@@ -112,24 +117,7 @@ export const FavoritosPage: React.FC = () => {
     );
   }
 
-  // Loading state
-  if (favoritesLoading || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 pb-20 md:pb-0 md:pl-20">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
-            </div>
-            
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Carregando Favoritos...
-            </h1>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 🚀 UX CLEAN: Remover loading state gigante desnecessário
 
   // Error state
   if (error) {
@@ -185,21 +173,29 @@ export const FavoritosPage: React.FC = () => {
         </div>
 
         {/* Content */}
-        {favoriteAuctions.length === 0 ? (
+        {(favoritesLoading || loading) ? (
+          /* 🚀 UX CLEAN: Loading discreto inline */
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <LoadingSpinner size="md" />
+              <p className="mt-3 text-sm text-gray-500">Carregando favoritos...</p>
+            </div>
+          </div>
+        ) : favoriteAuctions.length === 0 ? (
           /* Empty state */
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
             <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-6 h-6 text-gray-400" />
             </div>
-            
+
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Nenhum favorito ainda
             </h3>
-            
+
             <p className="text-gray-500 mb-6">
               Explore os leilões e marque seus favoritos clicando no ❤️
             </p>
-            
+
             <a
               href="/buscador/veiculos/todos"
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
@@ -208,18 +204,17 @@ export const FavoritosPage: React.FC = () => {
             </a>
           </div>
         ) : (
-          /* Auction Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {favoriteAuctions.map((auction) => (
-              <AuctionCard
-                key={auction._id}
-                auction={auction}
-                viewMode="vertical"
-              />
-            ))}
-          </div>
+          /* 🚀 SMART GRID: Virtualização automática para muitos favoritos */
+          <SmartAuctionGrid
+            auctions={favoriteAuctions}
+            viewMode="vertical"
+            virtualizationThreshold={20} // Threshold menor para favoritos
+            disableVirtualization={favoriteAuctions.length < 50} // Desabilitar se poucos itens
+          />
         )}
       </div>
     </div>
   );
 };
+
+export default FavoritosPage;

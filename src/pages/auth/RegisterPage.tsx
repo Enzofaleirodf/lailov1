@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Eye, EyeOff, Mail, Lock, User, Chrome } from 'lucide-react';
 
-export const RegisterPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -60,7 +60,7 @@ export const RegisterPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo */}
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-auction-500 to-auction-600 rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-xl">L</span>
           </div>
         </div>
@@ -202,7 +202,7 @@ export const RegisterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-auction-600 hover:bg-auction-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-auction-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? <LoadingSpinner size="sm" /> : 'Criar conta'}
               </button>
@@ -235,3 +235,5 @@ export const RegisterPage: React.FC = () => {
     </div>
   );
 };
+
+export default RegisterPage;

@@ -19,11 +19,11 @@ export const useAuctionData = ({
   page = 1 // ✅ PAGINAÇÃO REAL: Receber página como parâmetro
 }: UseAuctionDataParams): AuctionSearchResult & { loading: boolean; error: string | null } => {
   const [data, setData] = useState<AuctionSearchResult>({ auctions: [], totalSites: 0, newAuctions: 0 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 🚀 UX CLEAN: Começar sem loading desnecessário
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ CORREÇÃO: Debounce da pesquisa para evitar busca a cada letra digitada
-  const debouncedSearchQuery = useDebounce(searchQuery, 800); // 800ms de delay
+  // 🚀 UX CLEAN: Debounce otimizado para responsividade
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); // 300ms = responsivo
 
   // 🚀 OTIMIZAÇÃO: Memoizar filtros para evitar re-renders desnecessários
   const filters = useMemo((): Filters => {
@@ -73,8 +73,15 @@ export const useAuctionData = ({
     let isCancelled = false;
 
     const fetchData = async () => {
-      setLoading(true);
+      const startTime = Date.now();
       setError(null);
+
+      // 🚀 UX CLEAN: Loading inteligente - só ativar se demorar > 200ms
+      const loadingTimeout = setTimeout(() => {
+        if (!isCancelled) {
+          setLoading(true);
+        }
+      }, 200);
 
       try {
         // ✅ PAGINAÇÃO REAL: Usar página recebida como parâmetro
@@ -83,22 +90,25 @@ export const useAuctionData = ({
           currentType,
           filters,
           sortOption,
-          debouncedSearchQuery, // ✅ CORREÇÃO: Usar searchQuery com debounce
+          debouncedSearchQuery, // 🚀 UX CLEAN: Debounce otimizado
           page, // ✅ CORREÇÃO: Usar página real
           showExpiredAuctions // ✅ NOVO: Passar parâmetro de leilões expirados
         );
 
         if (!isCancelled) {
+          clearTimeout(loadingTimeout);
           setData(result);
         }
       } catch (err) {
         if (!isCancelled) {
+          clearTimeout(loadingTimeout);
           console.error('Erro ao buscar leilões:', err);
           setError(err instanceof Error ? err.message : 'Erro desconhecido');
           setData({ auctions: [], totalSites: 0, newAuctions: 0 });
         }
       } finally {
         if (!isCancelled) {
+          clearTimeout(loadingTimeout);
           setLoading(false);
         }
       }

@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Shield, LogOut, Key } from 'lucide-react';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
-export const UsuarioPage: React.FC = () => {
+const UsuarioPage: React.FC = () => {
   const { user, signOut, updatePassword } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -64,7 +64,7 @@ export const UsuarioPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20 md:pb-0 md:pl-20">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-8">
             <div className="flex items-center">
@@ -155,7 +155,7 @@ export const UsuarioPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-auction-600 text-white py-2 px-4 rounded-lg hover:bg-auction-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? <LoadingSpinner size="sm" /> : 'Atualizar Senha'}
                   </button>
@@ -208,3 +208,5 @@ export const UsuarioPage: React.FC = () => {
     </div>
   );
 };
+
+export default UsuarioPage;
