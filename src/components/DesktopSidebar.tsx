@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Building, Car, Heart, Gavel, User } from 'lucide-react';
-import { useHoverPreload } from '../hooks/useRoutePreload';
 
 export const DesktopSidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -35,13 +34,9 @@ export const DesktopSidebar: React.FC = () => {
   const NavButton = ({ item, isActive }: { item: typeof mainNavItems[0], isActive: boolean }) => {
     const Icon = item.icon;
 
-    // 🚀 PRELOAD INTELIGENTE: Precarregar rota no hover
-    const preloadProps = useHoverPreload(item.route, !isActive);
-
     return (
       <button
         onClick={() => handleNavigation(item.route)}
-        {...preloadProps} // 🚀 Adicionar eventos de preload
         className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 group ${
           isActive
             ? 'bg-auction-600 text-white shadow-lg'

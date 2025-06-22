@@ -1,14 +1,11 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Building, Car, Heart, Gavel, User } from 'lucide-react';
-import { useHoverPreload } from '../hooks/useRoutePreload';
-import { useIntelligentPrefetch } from '../hooks/useIntelligentPrefetch';
 import { cn } from '../lib/utils';
 
 export const MobileBottomNavbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { createHoverPrefetch, createClickTracker } = useIntelligentPrefetch();
 
   const navItems = [
     { icon: Building, route: '/buscador/imoveis/todos', id: 'imoveis', label: 'Imóveis' },
@@ -31,6 +28,7 @@ export const MobileBottomNavbar: React.FC = () => {
   const activeItem = getActiveItem();
 
   const handleNavigation = (route: string) => {
+    console.log('Navigating to:', route); // Debug log
     navigate(route);
   };
 
@@ -42,18 +40,10 @@ export const MobileBottomNavbar: React.FC = () => {
             const Icon = item.icon;
             const isActive = activeItem === item.id;
 
-            // 🚀 PRELOAD INTELIGENTE: Precarregar rota no hover
-            const preloadProps = useHoverPreload(item.route, !isActive);
-            const hoverPrefetchProps = createHoverPrefetch(item.route, !isActive);
-            const clickTrackerProps = createClickTracker(`nav-${item.id}`);
-
             return (
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item.route)}
-                {...preloadProps} // 🚀 Preload original
-                {...hoverPrefetchProps} // 🚀 Prefetch inteligente
-                {...clickTrackerProps} // 🚀 Tracking de cliques
                 className={cn(
                   "relative p-3 rounded-xl transition-all duration-200 active:scale-[0.95] focus:outline-none focus:ring-2 focus:ring-auction-500/20 focus:ring-offset-2",
                   isActive
